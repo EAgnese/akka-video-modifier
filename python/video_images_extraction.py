@@ -22,10 +22,9 @@ def export_each_frame(video_path:str, export_path:str):
         count += 1
 
 def main():
-
     # make a command-line argument parser & add various parameters
     parser = argparse.ArgumentParser(description="Python script to export each frame of a given video")
-    parser.add_argument("-v", "--video-path", help="Target video file")
+    parser.add_argument("-p", "--video-path", help="Target video file")
     parser.add_argument("-x", "--export-folder", help="Folder where the frames of the vdeo will be exported, default is current directory", default=".")
     # parse the arguments
 
