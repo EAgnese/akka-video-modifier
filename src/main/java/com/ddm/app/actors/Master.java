@@ -67,7 +67,7 @@ public class Master extends AbstractBehavior<Master.Message> {
     }
 
     private Behavior<Message> handle(StartMessage message) {
-        //TODO : start the actors that have to start
+        this.videoSequencer.tell(new VideoSequencer.StartMessage());
         return this;
     }
 

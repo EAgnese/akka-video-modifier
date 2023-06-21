@@ -15,8 +15,6 @@ import com.ddm.app.singletons.InputConfigurationSingleton;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import com.ddm.app.profiling.ModificationWorker;
-import com.ddm.app.singletons.SystemConfigurationSingleton;
 
 import java.io.File;
 import java.util.*;
@@ -35,31 +33,14 @@ public class VideoSequencer extends AbstractBehavior<VideoSequencer.Message> {
         private static final long serialVersionUID = -1963913294517850454L;
     }
 
-    @Getter
-    @NoArgsConstructor
-    @AllArgsConstructor
-    public static class HeaderMessage implements Message {
-        private static final long serialVersionUID = -5322425954432915838L;
-        int id;
-        String[] header;
-    }
 
     @Getter
     @NoArgsConstructor
     @AllArgsConstructor
-    public static class ColumnMessage implements Message {
-        private static final long serialVersionUID = -5322425954432915838L;
-        int id;
-        List<String> column;
-    }
-
-    @Getter
-    @NoArgsConstructor
-    @AllArgsConstructor
-    public static class BatchMessage implements Message {
+    public static class ImageMessage implements Message {
         private static final long serialVersionUID = 4591192372652568030L;
         int id;
-        List<String[]> batch;
+        byte[] image;
     }
 
     @Getter
@@ -98,7 +79,7 @@ public class VideoSequencer extends AbstractBehavior<VideoSequencer.Message> {
 
         this.inputReaders = new ArrayList<>(inputFiles.length);
         for (int id = 0; id < this.inputFiles.length; id++)
-            this.inputReaders.add(context.spawn(InputReader.create(id, this.inputFiles[id]), InputReader.DEFAULT_NAME + "_" + id));
+            this.inputReaders.add(context.spawn(InputReader.create(id), InputReader.DEFAULT_NAME + "_" + id));
 
         this.resultCollector = context.spawn(ResultCollector.create(), ResultCollector.DEFAULT_NAME);
         this.largeMessageProxy = this.getContext().spawn(LargeMessageProxy.create(this.getContext().getSelf().unsafeUpcast()), LargeMessageProxy.DEFAULT_NAME);
@@ -125,7 +106,6 @@ public class VideoSequencer extends AbstractBehavior<VideoSequencer.Message> {
     private final Queue<ActorRef<ModificationWorker.Message>> idleWorkers = new LinkedList<>();
     //TODO : same here
     private final Map<ActorRef<ModificationWorker.Message>, Integer> busyWorkers = new HashMap<>();
-    private final Map<String, List<String>> columns = new HashMap<>();
 
     ////////////////////
     // Actor Behavior //
@@ -135,7 +115,7 @@ public class VideoSequencer extends AbstractBehavior<VideoSequencer.Message> {
     public Receive<Message> createReceive() {
         return newReceiveBuilder()
                 .onMessage(StartMessage.class, this::handle)
-                .onMessage(BatchMessage.class, this::handle)
+                .onMessage(ImageMessage.class, this::handle)
                 .onMessage(RegistrationMessage.class, this::handle)
                 .onMessage(CompletionMessage.class, this::handle)
                 .onSignal(Terminated.class, this::handle)
@@ -144,14 +124,16 @@ public class VideoSequencer extends AbstractBehavior<VideoSequencer.Message> {
 
     private Behavior<Message> handle(StartMessage message) {
         for (ActorRef<InputReader.Message> inputReader : this.inputReaders)
-            inputReader.tell(new InputReader.ReadBatchMessage(this.getContext().getSelf()));
+            inputReader.tell(new InputReader.ReadVideoMessage(this.getContext().getSelf()));
         this.startTime = System.currentTimeMillis();
         return this;
     }
 
-    private Behavior<Message> handle(BatchMessage message) {
+    private Behavior<Message> handle(ImageMessage message) {
 
         Integer task = 0;
+
+        //TODO : use python script to modify the image
 
         if (!this.idleWorkers.isEmpty()){
             ActorRef<ModificationWorker.Message> newModificationWorker = this.idleWorkers.remove();
@@ -161,9 +143,6 @@ public class VideoSequencer extends AbstractBehavior<VideoSequencer.Message> {
             this.unassignedTasks.add(task);
         }
 
-
-        if (message.getBatch().size() != 0)
-            this.inputReaders.get(message.getId()).tell(new InputReader.ReadBatchMessage(this.getContext().getSelf()));
         return this;
     }
 
@@ -176,7 +155,6 @@ public class VideoSequencer extends AbstractBehavior<VideoSequencer.Message> {
         this.getContext().watch(modificationWorker);
         this.modificationWorkers.add(modificationWorker);
         this.getContext().getLog().info("Registration of worker {}", this.modificationWorkers.size()-1);
-
 
         if (this.unassignedTasks.isEmpty()) {
             this.idleWorkers.add(modificationWorker);

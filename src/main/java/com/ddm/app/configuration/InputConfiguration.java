@@ -11,7 +11,7 @@ import java.io.IOException;
 @Data
 public class InputConfiguration {
 
-    private String inputPath = "data" + File.separator + "ideos";
+    private String inputPath = "data" + File.separator + "videos";
 
     public void update(CommandMaster commandMaster) {
         this.inputPath = commandMaster.inputPath;

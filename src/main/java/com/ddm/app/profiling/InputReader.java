@@ -14,8 +14,7 @@ import lombok.NoArgsConstructor;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
+import java.nio.file.Files;
 
 public class InputReader extends AbstractBehavior<InputReader.Message> {
 
@@ -29,15 +28,7 @@ public class InputReader extends AbstractBehavior<InputReader.Message> {
     @Getter
     @NoArgsConstructor
     @AllArgsConstructor
-    public static class ReadHeaderMessage implements Message {
-        private static final long serialVersionUID = 1729062814525657711L;
-        ActorRef<VideoSequencer.Message> replyTo;
-    }
-
-    @Getter
-    @NoArgsConstructor
-    @AllArgsConstructor
-    public static class ReadBatchMessage implements Message {
+    public static class ReadVideoMessage implements Message {
         private static final long serialVersionUID = -7915854043207237318L;
         ActorRef<VideoSequencer.Message> replyTo;
     }
@@ -48,12 +39,11 @@ public class InputReader extends AbstractBehavior<InputReader.Message> {
 
     public static final String DEFAULT_NAME = "inputReader";
 
-    public static Behavior<Message> create(final int id, final File inputFile) {
-        return Behaviors.setup(context -> new InputReader(context, id, inputFile));
+    public static Behavior<Message> create(final int id) {
+        return Behaviors.setup(context -> new InputReader(context, id));
     }
 
-    private InputReader(ActorContext<Message> context,final int id, final File inputFile /*or by path ?*/) throws IOException {
-        //TODO : do something with the video
+    private InputReader(ActorContext<Message> context,final int id) throws IOException {
         super(context);
         this.id = id;
     }
@@ -71,24 +61,23 @@ public class InputReader extends AbstractBehavior<InputReader.Message> {
     @Override
     public Receive<Message> createReceive() {
         return newReceiveBuilder()
-                .onMessage(ReadBatchMessage.class, this::handle)
+                .onMessage(ReadVideoMessage.class, this::handle)
                 .onSignal(PostStop.class, this::handle)
                 .build();
     }
 
-    private Behavior<Message> handle(ReadBatchMessage message) throws IOException {
-        List<String[]> batch = new ArrayList<>(10000);
-//        for (int i = 0; i < this.batchSize; i++) {
-//            String[] line = this.reader.readNext();
-//            if (line == null)
-//                break;
-//            batch.add(line);
-//        }
+    private Behavior<Message> handle(ReadVideoMessage message) throws IOException {
 
-        //TODO : read the video (via python scripts)
+        File[] files = new File("/data/images/video" + this.id).listFiles();
 
+        if (files == null){
+            throw new IOException("no images found");
+        }
 
-        message.getReplyTo().tell(new VideoSequencer.BatchMessage(this.id, batch));
+        for (File file : files){
+            byte[] content = Files.readAllBytes(file.toPath());
+            message.getReplyTo().tell(new VideoSequencer.ImageMessage(this.id, content));
+        }
         return this;
     }
 

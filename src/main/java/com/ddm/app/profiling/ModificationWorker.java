@@ -13,7 +13,6 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-import java.util.List;
 import java.util.Set;
 
 public class ModificationWorker extends AbstractBehavior<ModificationWorker.Message> {
@@ -43,11 +42,16 @@ public class ModificationWorker extends AbstractBehavior<ModificationWorker.Mess
         Integer task;
     }
 
+    @NoArgsConstructor
+    public static class ShutdownMessage implements Message {
+        private static final long serialVersionUID = 2352310112323L;
+    }
+
     ////////////////////////
     // Actor Construction //
     ////////////////////////
 
-    public static final String DEFAULT_NAME = "dependencyWorker";
+    public static final String DEFAULT_NAME = "modificationWorker";
 
     public static Behavior<Message> create() {
         return Behaviors.setup(ModificationWorker::new);
@@ -68,6 +72,8 @@ public class ModificationWorker extends AbstractBehavior<ModificationWorker.Mess
 
     private final ActorRef<LargeMessageProxy.Message> largeMessageProxy;
 
+//    private boolean haveToShutDown = false;
+
     ////////////////////
     // Actor Behavior //
     ////////////////////
@@ -77,6 +83,7 @@ public class ModificationWorker extends AbstractBehavior<ModificationWorker.Mess
         return newReceiveBuilder()
                 .onMessage(ReceptionistListingMessage.class, this::handle)
                 .onMessage(TaskMessage.class, this::handle)
+                //.onMessage(ShutdownMessage.class, this::handle)
                 .build();
     }
 
@@ -90,13 +97,23 @@ public class ModificationWorker extends AbstractBehavior<ModificationWorker.Mess
     private Behavior<Message> handle(TaskMessage message) {
         this.getContext().getLog().info("Working!");
         // I should probably know how to solve this task, but for now I just pretend some work...
-        this.getContext().getLog().info("{}", message.getTask());
+        this.getContext().getLog().info("Task : {}", message.getTask());
         Integer result = 0;
+
+        // Solving the task
 
         LargeMessageProxy.LargeMessage completionMessage = new VideoSequencer.CompletionMessage(this.getContext().getSelf(), result);
         this.largeMessageProxy.tell(new LargeMessageProxy.SendMessage(completionMessage, message.getVideoSequencerLargeMessageProxy()));
 
+//        if (this.haveToShutDown){
+//            return Behaviors.stopped();
+//        }
         return this;
     }
+
+//    private Behavior<Message> handle(ShutdownMessage message) {
+//        this.haveToShutDown = true;
+//        return this;
+//    }
 
 }

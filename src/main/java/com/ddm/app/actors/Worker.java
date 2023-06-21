@@ -8,6 +8,7 @@ import akka.actor.typed.javadsl.ActorContext;
 import akka.actor.typed.javadsl.Behaviors;
 import akka.actor.typed.javadsl.Receive;
 import com.ddm.app.actors.patterns.Reaper;
+import com.ddm.app.profiling.ModificationWorker;
 import com.ddm.app.serialization.AkkaSerializable;
 import com.ddm.app.singletons.SystemConfigurationSingleton;
 import lombok.NoArgsConstructor;
@@ -45,17 +46,17 @@ public class Worker extends AbstractBehavior<Worker.Message> {
 
         final int numWorkers = SystemConfigurationSingleton.get().getNumWorkers();
 
-        //TODO : initialize different actors like below
-        //this.workers = new ArrayList<>(numWorkers);
-        //for (int id = 0; id < numWorkers; id++)
-        //    this.workers.add(context.spawn(ModificationWorker.create(), ModificationWorker.DEFAULT_NAME + "_" + id, DispatcherSelector.fromConfig("akka.worker-pool-dispatcher")));
+        this.workers = new ArrayList<>(numWorkers);
+        for (int id = 0; id < numWorkers; id++)
+            this.workers.add(context.spawn(ModificationWorker.create(), ModificationWorker.DEFAULT_NAME + "_" + id, DispatcherSelector.fromConfig("akka.worker-pool-dispatcher")));
+
     }
 
     /////////////////
     // Actor State //
     /////////////////
 
-    //TODO : private final ActorRef<Actor.Message> or List<ActorRef<Actor.Message>>
+    final List<ActorRef<ModificationWorker.Message>> workers;
 
     ////////////////////
     // Actor Behavior //
@@ -73,6 +74,10 @@ public class Worker extends AbstractBehavior<Worker.Message> {
         // we should propagate this ShutdownMessage to all active child actors so that they
         // can end their protocols in a clean way. Simply stopping this actor also stops all
         // child actors, but in a hard way!
-        return Behaviors.stopped();
+        for(ActorRef<ModificationWorker.Message> worker : this.workers){
+            worker.tell(new ModificationWorker.ShutdownMessage());
+        }
+
+        return this;
     }
 }

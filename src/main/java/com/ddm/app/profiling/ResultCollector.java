@@ -77,6 +77,8 @@ public class ResultCollector extends AbstractBehavior<ResultCollector.Message> {
     private Behavior<Message> handle(FinalizeMessage message) throws IOException {
         this.getContext().getLog().info("Received FinalizeMessage!");
 
+        //TODO : Merge all the images to remake the videos
+
         this.getContext().getSystem().unsafeUpcast().tell(new Guardian.ShutdownMessage());
         return this;
     }
