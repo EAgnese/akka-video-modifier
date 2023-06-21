@@ -8,6 +8,7 @@ import akka.actor.typed.javadsl.ActorContext;
 import akka.actor.typed.javadsl.Behaviors;
 import akka.actor.typed.javadsl.Receive;
 import com.ddm.app.serialization.AkkaSerializable;
+import com.ddm.app.utils.PythonScriptRunner;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -39,13 +40,24 @@ public class InputReader extends AbstractBehavior<InputReader.Message> {
 
     public static final String DEFAULT_NAME = "inputReader";
 
-    public static Behavior<Message> create(final int id) {
-        return Behaviors.setup(context -> new InputReader(context, id));
+    public static Behavior<Message> create(final int id, final File inputfile) {
+        return Behaviors.setup(context -> new InputReader(context, id, inputfile));
     }
 
-    private InputReader(ActorContext<Message> context,final int id) throws IOException {
+    private InputReader(ActorContext<Message> context,final int id, final File inputFile) throws IOException {
         super(context);
         this.id = id;
+
+        this.getContext().getLog().info("Creation of inputReader "+id);
+
+        String[] cmd = {"python3", "python/video_images_extraction.py", "-p", inputFile.getPath(), "-x", "data/images"};
+        this.getContext().getLog().info(inputFile.getPath());
+        //String[] cmd = {"pwd"};
+
+        for (String line : PythonScriptRunner.run(cmd)){
+            this.getContext().getLog().info(line);
+        }
+
     }
 
     /////////////////
@@ -53,6 +65,7 @@ public class InputReader extends AbstractBehavior<InputReader.Message> {
     /////////////////
 
     private final int id;
+
 
     ////////////////////
     // Actor Behavior //

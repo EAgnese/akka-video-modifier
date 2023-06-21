@@ -79,7 +79,7 @@ public class VideoSequencer extends AbstractBehavior<VideoSequencer.Message> {
 
         this.inputReaders = new ArrayList<>(inputFiles.length);
         for (int id = 0; id < this.inputFiles.length; id++)
-            this.inputReaders.add(context.spawn(InputReader.create(id), InputReader.DEFAULT_NAME + "_" + id));
+            this.inputReaders.add(context.spawn(InputReader.create(id, inputFiles[id]), InputReader.DEFAULT_NAME + "_" + id));
 
         this.resultCollector = context.spawn(ResultCollector.create(), ResultCollector.DEFAULT_NAME);
         this.largeMessageProxy = this.getContext().spawn(LargeMessageProxy.create(this.getContext().getSelf().unsafeUpcast()), LargeMessageProxy.DEFAULT_NAME);
@@ -133,7 +133,7 @@ public class VideoSequencer extends AbstractBehavior<VideoSequencer.Message> {
 
         Integer task = 0;
 
-        //TODO : use python script to modify the image
+        // Todo : create a task
 
         if (!this.idleWorkers.isEmpty()){
             ActorRef<ModificationWorker.Message> newModificationWorker = this.idleWorkers.remove();

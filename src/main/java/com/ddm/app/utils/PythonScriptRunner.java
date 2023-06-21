@@ -1,20 +1,17 @@
+package com.ddm.app.utils;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.util.ArrayList;
+import java.util.List;
 
 public class PythonScriptRunner {
-    public static void main(String[] args) {
+    public static List<String> run(String[] cmd){
+        List<String> result = new ArrayList<>();
+
         try {
-            // Chemin vers le script Python à exécuter
-            String pythonScriptPath = "../../subtitles.py";
-            String imagePath = "../../images/SWMG.png";
-            String subtitles = "test 8000";
-            String exportFolder = "../../export";
-
-
-            // Construire la commande pour exécuter le script Python
-            String[] cmd = {"python3", pythonScriptPath, "-p", imagePath, "-s", subtitles, "-x", exportFolder};
 
             // Lancer le processus externe pour exécuter le script Python
             Process process = Runtime.getRuntime().exec(cmd);
@@ -23,10 +20,25 @@ public class PythonScriptRunner {
             InputStream inputStream = process.getInputStream();
             BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
 
+            // Récupérer le flux d'erreurs du processus
+            InputStream errorStream = process.getErrorStream();
+            BufferedReader errorReader = new BufferedReader(new InputStreamReader(errorStream));
+
             // Lire les lignes de sortie du processus
-            String line;
-            while ((line = reader.readLine()) != null) {
-                System.out.println(line);
+            String inputLine, errorLine;
+            boolean remainingLines = true;
+            while (remainingLines) {
+                inputLine = reader.readLine();
+                errorLine = errorReader.readLine();
+
+                if (inputLine != null){
+                    result.add(inputLine);
+                }
+                if (errorLine != null){
+                    result.add(errorLine);
+                }
+
+                remainingLines = (inputLine != null) || (errorLine != null);
             }
 
             // Attendre que le processus se termine
@@ -34,12 +46,15 @@ public class PythonScriptRunner {
 
             // Vérifier le code de sortie du processus
             if (exitCode == 0) {
-                System.out.println("Le script Python s'est terminé avec succès.");
-            } else {
-                System.out.println("Le script Python a rencontré une erreur.");
+                result.add("Le script Python s'est terminé avec succès.");
+            }else {
+                result.add("Le script Python a rencontré une erreur.");
             }
+
         } catch (IOException | InterruptedException e) {
-            e.printStackTrace();
+            result.add(e.getMessage());
         }
+
+        return result;
     }
 }
