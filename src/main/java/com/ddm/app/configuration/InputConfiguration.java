@@ -4,9 +4,6 @@ package com.ddm.app.configuration;
 import lombok.Data;
 
 import java.io.File;
-import java.io.IOException;
-
-//Configuration for the input (the video) of the application
 
 @Data
 public class InputConfiguration {
@@ -20,11 +17,6 @@ public class InputConfiguration {
     public File[] getInputFiles() {
         return new File(this.inputPath).listFiles();
     }
-
-    public void cuttingVideo(File inputFile) throws IOException {
-        //TODO : call the python script
-    }
-
 
 }
 

@@ -9,6 +9,7 @@ import akka.actor.typed.javadsl.Behaviors;
 import akka.actor.typed.javadsl.Receive;
 import com.ddm.app.serialization.AkkaSerializable;
 import com.ddm.app.utils.PythonScriptRunner;
+import com.ddm.app.utils.SubtitleFrameMapper;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -16,6 +17,8 @@ import lombok.NoArgsConstructor;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.util.HashMap;
+import java.util.Map;
 
 public class InputReader extends AbstractBehavior<InputReader.Message> {
 
@@ -47,6 +50,7 @@ public class InputReader extends AbstractBehavior<InputReader.Message> {
     private InputReader(ActorContext<Message> context,final int id, final File inputFile) throws IOException {
         super(context);
         this.id = id;
+        this.videoName = inputFile.getName().replace('.','-');
 
         this.getContext().getLog().info("Creation of inputReader "+id);
 
@@ -58,6 +62,9 @@ public class InputReader extends AbstractBehavior<InputReader.Message> {
             this.getContext().getLog().info(line);
         }
 
+        SubtitleFrameMapper prout = new SubtitleFrameMapper(24,"data/SWMG_subtitles.txt");
+        this.subtitles = prout.mapFramesToSubtitles();
+
     }
 
     /////////////////
@@ -65,7 +72,9 @@ public class InputReader extends AbstractBehavior<InputReader.Message> {
     /////////////////
 
     private final int id;
+    private final String videoName;
 
+    private Map<Integer,String> subtitles = new HashMap<>();
 
     ////////////////////
     // Actor Behavior //
@@ -81,15 +90,22 @@ public class InputReader extends AbstractBehavior<InputReader.Message> {
 
     private Behavior<Message> handle(ReadVideoMessage message) throws IOException {
 
-        File[] files = new File("/data/images/video" + this.id).listFiles();
+        this.getContext().getLog().info("Reading video " + this.id);
+        String path = "data/images/" + this.videoName + "/";
+
+        File[] files = new File(path).listFiles();
 
         if (files == null){
             throw new IOException("no images found");
         }
 
+        int i = 0;
         for (File file : files){
             byte[] content = Files.readAllBytes(file.toPath());
-            message.getReplyTo().tell(new VideoSequencer.ImageMessage(this.id, content));
+            String sub = this.subtitles.get(i) != null ? this.subtitles.get(i) : "";
+
+            message.getReplyTo().tell(new VideoSequencer.ImageMessage(this.id, content, file.getName(), sub));
+            i++;
         }
         return this;
     }
