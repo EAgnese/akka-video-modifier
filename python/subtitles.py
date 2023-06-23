@@ -3,7 +3,7 @@ import numpy as np
 import sys
 import utils
 import argparse
-
+import os
 
 
 class Subtitles:
@@ -152,8 +152,8 @@ def main():
     # Displaying the image
     # TODO : delete
     # utils.show_image(image)
-
-    cv2.imwrite(export_folder + "/edited_" + img_name, image)
+    os.remove(image_path)
+    cv2.imwrite(export_folder + "/" + img_name, image)
 
 if(__name__ == "__main__"):
     main()

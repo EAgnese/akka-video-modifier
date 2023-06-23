@@ -4,7 +4,7 @@ import time
 import sys
 import utils
 import argparse
-
+import os
 
 
 def edge_mask(img, line_size, blur_value):
@@ -69,6 +69,7 @@ def main():
     print(f"final cartoon image done")
     # TODO : delete
     # utils.show_image(cartoon)
+    os.remove(image_path)
     cv2.imwrite(export_folder+ "/" + img_name, cartoon)
 
 if __name__ == "__main__":
