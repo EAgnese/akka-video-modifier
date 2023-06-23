@@ -1,0 +1,2 @@
+00:00:00,000-00:00:01,000 Salut je suis un test
+00:00:02,10-00:00:03,12 Ceci est un autre sous-titre
