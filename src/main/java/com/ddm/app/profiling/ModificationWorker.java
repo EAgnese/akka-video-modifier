@@ -7,12 +7,17 @@ import akka.actor.typed.javadsl.ActorContext;
 import akka.actor.typed.javadsl.Behaviors;
 import akka.actor.typed.javadsl.Receive;
 import akka.actor.typed.receptionist.Receptionist;
+import com.ddm.app.Task;
 import com.ddm.app.actors.patterns.LargeMessageProxy;
 import com.ddm.app.serialization.AkkaSerializable;
+import com.ddm.app.utils.PythonScriptRunner;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.util.Set;
 
 public class ModificationWorker extends AbstractBehavior<ModificationWorker.Message> {
@@ -38,8 +43,7 @@ public class ModificationWorker extends AbstractBehavior<ModificationWorker.Mess
     public static class TaskMessage implements Message {
         private static final long serialVersionUID = -4667745204456518160L;
         ActorRef<LargeMessageProxy.Message> videoSequencerLargeMessageProxy;
-        //TODO : change Integer by Task
-        Integer task;
+        Task task;
     }
 
     @NoArgsConstructor
@@ -97,10 +101,35 @@ public class ModificationWorker extends AbstractBehavior<ModificationWorker.Mess
     private Behavior<Message> handle(TaskMessage message) {
         this.getContext().getLog().info("Working!");
         // I should probably know how to solve this task, but for now I just pretend some work...
-        this.getContext().getLog().info("Task : {}", message.getTask());
+
+        Task task = message.getTask();
+        String imgName = task.getImgName();
+
+        try (FileOutputStream outputStream = new FileOutputStream(imgName)){
+            outputStream.write(task.getImg());
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
         Integer result = 0;
 
-        // Solving the task
+        if (task.isCartoon()){
+            String[] cmdCartoon = {"python3", "python/cartoon.py", "-p", imgName};
+            //String[] cmd = {"pwd"};
+
+            for (String line : PythonScriptRunner.run(cmdCartoon)){
+                this.getContext().getLog().info(line);
+            }
+        }
+
+
+        String[] cmdSubtitles = {"python3", "python/subtitles.py", "-p", imgName, "-s", task.getSubtitles()};
+        //String[] cmd = {"pwd"};
+
+        for (String line : PythonScriptRunner.run(cmdSubtitles)){
+            this.getContext().getLog().info(line);
+        }
+
+
 
         LargeMessageProxy.LargeMessage completionMessage = new VideoSequencer.CompletionMessage(this.getContext().getSelf(), result);
         this.largeMessageProxy.tell(new LargeMessageProxy.SendMessage(completionMessage, message.getVideoSequencerLargeMessageProxy()));

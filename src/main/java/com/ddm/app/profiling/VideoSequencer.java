@@ -9,6 +9,7 @@ import akka.actor.typed.javadsl.Behaviors;
 import akka.actor.typed.javadsl.Receive;
 import akka.actor.typed.receptionist.Receptionist;
 import akka.actor.typed.receptionist.ServiceKey;
+import com.ddm.app.Task;
 import com.ddm.app.actors.patterns.LargeMessageProxy;
 import com.ddm.app.serialization.AkkaSerializable;
 import com.ddm.app.singletons.InputConfigurationSingleton;
@@ -41,6 +42,8 @@ public class VideoSequencer extends AbstractBehavior<VideoSequencer.Message> {
         private static final long serialVersionUID = 4591192372652568030L;
         int id;
         byte[] image;
+        String name;
+        String subtitles;
     }
 
     @Getter
@@ -101,11 +104,10 @@ public class VideoSequencer extends AbstractBehavior<VideoSequencer.Message> {
     private final ActorRef<ResultCollector.Message> resultCollector;
     private final ActorRef<LargeMessageProxy.Message> largeMessageProxy;
 
-    //TODO : change Integer by Task
-    private final Queue<Integer> unassignedTasks = new LinkedList<>();
+    private final Queue<Task> unassignedTasks = new LinkedList<>();
     private final Queue<ActorRef<ModificationWorker.Message>> idleWorkers = new LinkedList<>();
-    //TODO : same here
-    private final Map<ActorRef<ModificationWorker.Message>, Integer> busyWorkers = new HashMap<>();
+    private final Map<ActorRef<ModificationWorker.Message>, Task> busyWorkers = new HashMap<>();
+
 
     ////////////////////
     // Actor Behavior //
@@ -123,23 +125,26 @@ public class VideoSequencer extends AbstractBehavior<VideoSequencer.Message> {
     }
 
     private Behavior<Message> handle(StartMessage message) {
+        this.getContext().getLog().info("hello, i'm starting ooooooooooooooooooooooooooooooooooooooor ? ");
         for (ActorRef<InputReader.Message> inputReader : this.inputReaders)
             inputReader.tell(new InputReader.ReadVideoMessage(this.getContext().getSelf()));
+
         this.startTime = System.currentTimeMillis();
         return this;
     }
 
     private Behavior<Message> handle(ImageMessage message) {
 
-        Integer task = 0;
+        this.getContext().getLog().info(message.getName()+" "+message.getSubtitles());
+        Task task = new Task(message.getImage(), message.getName(), message.getSubtitles(), false);
 
-        // Todo : create a task
 
         if (!this.idleWorkers.isEmpty()){
             ActorRef<ModificationWorker.Message> newModificationWorker = this.idleWorkers.remove();
             this.busyWorkers.put(newModificationWorker, task);
             newModificationWorker.tell(new ModificationWorker.TaskMessage(this.largeMessageProxy, task));
         }else {
+
             this.unassignedTasks.add(task);
         }
 
@@ -161,7 +166,7 @@ public class VideoSequencer extends AbstractBehavior<VideoSequencer.Message> {
             return this;
         }
 
-        Integer task = this.unassignedTasks.remove();
+        Task task = this.unassignedTasks.remove();
         this.busyWorkers.put(modificationWorker, task);
         modificationWorker.tell(new ModificationWorker.TaskMessage(this.largeMessageProxy, task));
         return this;
@@ -181,7 +186,7 @@ public class VideoSequencer extends AbstractBehavior<VideoSequencer.Message> {
 
         // Once I found all unary INDs, I could check if this.discoverNaryDependencies is set to true and try to detect n-ary INDs as well
 
-        Integer task = this.unassignedTasks.remove();
+        Task task = this.unassignedTasks.remove();
         this.busyWorkers.put(modificationWorker, task);
         modificationWorker.tell(new ModificationWorker.TaskMessage(this.largeMessageProxy, task));
         return this;
@@ -199,7 +204,7 @@ public class VideoSequencer extends AbstractBehavior<VideoSequencer.Message> {
         if (idleWorkers.remove(modificationWorker))
             return this;
 
-        Integer task = this.busyWorkers.remove(modificationWorker);
+        Task task = this.busyWorkers.remove(modificationWorker);
 
         if(this.idleWorkers.isEmpty()){
             this.unassignedTasks.add(task);
