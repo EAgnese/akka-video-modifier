@@ -7,6 +7,7 @@ import akka.actor.typed.javadsl.ActorContext;
 import akka.actor.typed.javadsl.Behaviors;
 import akka.actor.typed.javadsl.Receive;
 import akka.actor.typed.receptionist.Receptionist;
+import com.ddm.app.Result;
 import com.ddm.app.Task;
 import com.ddm.app.actors.patterns.LargeMessageProxy;
 import com.ddm.app.serialization.AkkaSerializable;
@@ -15,9 +16,10 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.Set;
 
 public class ModificationWorker extends AbstractBehavior<ModificationWorker.Message> {
@@ -105,23 +107,23 @@ public class ModificationWorker extends AbstractBehavior<ModificationWorker.Mess
         Task task = message.getTask();
         String imgName = task.getImgName();
 
+        //save the image we get through the Task
         try (FileOutputStream outputStream = new FileOutputStream(imgName)){
             outputStream.write(task.getImg());
         } catch (IOException e) {
             e.printStackTrace();
         }
-        Integer result = 0;
 
+        //If the video has to be cartoonified, launch the cartoon script
         if (task.isCartoon()){
             String[] cmdCartoon = {"python3", "python/cartoon.py", "-p", imgName};
-            //String[] cmd = {"pwd"};
 
             for (String line : PythonScriptRunner.run(cmdCartoon)){
                 this.getContext().getLog().info(line);
             }
         }
 
-
+        //Script for the subtitles
         String[] cmdSubtitles = {"python3", "python/subtitles.py", "-p", imgName, "-s", task.getSubtitles()};
         //String[] cmd = {"pwd"};
 
@@ -129,7 +131,18 @@ public class ModificationWorker extends AbstractBehavior<ModificationWorker.Mess
             this.getContext().getLog().info(line);
         }
 
+        Result result;
 
+        try {
+            byte[] content = Files.readAllBytes(Paths.get(imgName));
+            result = new Result(content,imgName,message.getTask().getVideoId());
+        } catch (IOException e) {
+            this.getContext().getLog().error(e.getMessage());
+            byte[] content = {};
+            result = new Result(content,imgName,message.getTask().getVideoId());
+        }
+
+        // TODO : handle correctly a fail in this worker
 
         LargeMessageProxy.LargeMessage completionMessage = new VideoSequencer.CompletionMessage(this.getContext().getSelf(), result);
         this.largeMessageProxy.tell(new LargeMessageProxy.SendMessage(completionMessage, message.getVideoSequencerLargeMessageProxy()));
