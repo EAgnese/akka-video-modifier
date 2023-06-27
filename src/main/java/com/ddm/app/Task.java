@@ -10,4 +10,5 @@ public class Task {
     String imgName;
     String subtitles;
     boolean cartoon;
+    int videoId;
 }
