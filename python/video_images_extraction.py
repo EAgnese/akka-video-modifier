@@ -1,6 +1,7 @@
 import cv2
 import argparse
 import os
+import utils
 
 def export_each_frame(video_path:str, export_path:str):
     """_summary_
@@ -13,10 +14,11 @@ def export_each_frame(video_path:str, export_path:str):
     vidcap = cv2.VideoCapture(video_path)
     success,image = vidcap.read()
     count = 0
-    if(not os.path.exists(f"{export_path}/{video_name}")):
-        os.makedirs(f"{export_path}/{video_name}")
+
+    utils.create_dir(f"{export_path}/{video_name}")
+
     while success:
-        cv2.imwrite(f"{export_path}/{video_name}/{video_name}_frame{count}.png", image)     # save frame as PNG file
+        cv2.imwrite(f"{export_path}/{video_name}/{video_name}_frame{count}.jpg", image)     # save frame as PNG file
         success,image = vidcap.read()
         print(f'Read frame {count}: ', success)
         count += 1

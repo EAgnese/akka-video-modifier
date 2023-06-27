@@ -1,4 +1,5 @@
 import cv2
+import os
 
 def show_image(img):
     cv2.imshow("test", img)
@@ -8,3 +9,7 @@ def show_image(img):
         if (keyCode & 0xFF) == ord("q"):
             cv2.destroyAllWindows()
             break
+
+def create_dir(dir):
+    if(not os.path.exists(dir)):
+        os.makedirs(dir)
