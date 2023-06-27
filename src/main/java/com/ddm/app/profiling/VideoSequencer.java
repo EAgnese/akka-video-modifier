@@ -9,15 +9,19 @@ import akka.actor.typed.javadsl.Behaviors;
 import akka.actor.typed.javadsl.Receive;
 import akka.actor.typed.receptionist.Receptionist;
 import akka.actor.typed.receptionist.ServiceKey;
+import com.ddm.app.Result;
 import com.ddm.app.Task;
 import com.ddm.app.actors.patterns.LargeMessageProxy;
 import com.ddm.app.serialization.AkkaSerializable;
 import com.ddm.app.singletons.InputConfigurationSingleton;
+import com.ddm.app.utils.PythonScriptRunner;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.util.*;
 
 public class VideoSequencer extends AbstractBehavior<VideoSequencer.Message> {
@@ -60,8 +64,7 @@ public class VideoSequencer extends AbstractBehavior<VideoSequencer.Message> {
     public static class CompletionMessage implements Message {
         private static final long serialVersionUID = -7642425159675583598L;
         ActorRef<ModificationWorker.Message> ModificationWorker;
-        //TODO: Change Integer by Result
-        Integer result;
+        Result result;
     }
 
     ////////////////////////
@@ -78,12 +81,18 @@ public class VideoSequencer extends AbstractBehavior<VideoSequencer.Message> {
 
     private VideoSequencer(ActorContext<Message> context) {
         super(context);
-        this.inputFiles = InputConfigurationSingleton.get().getInputFiles();
+        File[] inputFiles = InputConfigurationSingleton.get().getInputFiles();
 
+
+        this.nbrImages = new ArrayList<>(inputFiles.length);
+        this.modifiedImages = new ArrayList<>(inputFiles.length);
         this.inputReaders = new ArrayList<>(inputFiles.length);
-        for (int id = 0; id < this.inputFiles.length; id++)
-            this.inputReaders.add(context.spawn(InputReader.create(id, inputFiles[id]), InputReader.DEFAULT_NAME + "_" + id));
 
+        for (int id = 0; id < inputFiles.length; id++){
+            this.inputReaders.add(context.spawn(InputReader.create(id, inputFiles[id]), InputReader.DEFAULT_NAME + "_" + id));
+            this.nbrImages.add(0);
+            this.modifiedImages.add(0);
+        }
         this.resultCollector = context.spawn(ResultCollector.create(), ResultCollector.DEFAULT_NAME);
         this.largeMessageProxy = this.getContext().spawn(LargeMessageProxy.create(this.getContext().getSelf().unsafeUpcast()), LargeMessageProxy.DEFAULT_NAME);
 
@@ -97,12 +106,14 @@ public class VideoSequencer extends AbstractBehavior<VideoSequencer.Message> {
     /////////////////
 
     private long startTime;
-
-    private final File[] inputFiles;
     private final List<ActorRef<InputReader.Message>> inputReaders;
     private final List<ActorRef<ModificationWorker.Message>> modificationWorkers;
     private final ActorRef<ResultCollector.Message> resultCollector;
     private final ActorRef<LargeMessageProxy.Message> largeMessageProxy;
+
+    private ArrayList<Integer> nbrImages;
+
+    private ArrayList<Integer> modifiedImages;
 
     private final Queue<Task> unassignedTasks = new LinkedList<>();
     private final Queue<ActorRef<ModificationWorker.Message>> idleWorkers = new LinkedList<>();
@@ -125,7 +136,6 @@ public class VideoSequencer extends AbstractBehavior<VideoSequencer.Message> {
     }
 
     private Behavior<Message> handle(StartMessage message) {
-        this.getContext().getLog().info("hello, i'm starting ooooooooooooooooooooooooooooooooooooooor ? ");
         for (ActorRef<InputReader.Message> inputReader : this.inputReaders)
             inputReader.tell(new InputReader.ReadVideoMessage(this.getContext().getSelf()));
 
@@ -135,9 +145,10 @@ public class VideoSequencer extends AbstractBehavior<VideoSequencer.Message> {
 
     private Behavior<Message> handle(ImageMessage message) {
 
-        this.getContext().getLog().info(message.getName()+" "+message.getSubtitles());
-        Task task = new Task(message.getImage(), message.getName(), message.getSubtitles(), false);
+        this.nbrImages.set(message.getId(), this.nbrImages.get(message.getId()) + 1)  ;
+        this.getContext().getLog().info(String.valueOf(this.nbrImages.get(message.getId())));
 
+        Task task = new Task(message.getImage(), message.getName(), message.getSubtitles(), false, message.getId());
 
         if (!this.idleWorkers.isEmpty()){
             ActorRef<ModificationWorker.Message> newModificationWorker = this.idleWorkers.remove();
@@ -174,17 +185,45 @@ public class VideoSequencer extends AbstractBehavior<VideoSequencer.Message> {
 
     private Behavior<Message> handle(CompletionMessage message) {
         ActorRef<ModificationWorker.Message> modificationWorker = message.getModificationWorker();
-        Integer result = message.getResult();
-        // If this was a reasonable result, I would probably do something with it and potentially generate more work ... for now, let's just generate a random, binary IND.
+        Result result = message.getResult();
+
+        File file = new File("result/" + result.getVideoId() + "/images/" + result.getImgName());
+
+        File parentDirectory = file.getParentFile();
+        if (parentDirectory != null) {
+            parentDirectory.mkdirs(); // Créer les répertoires parents si nécessaire
+        }
+
+
+        // Save the image we get through the result
+        try (FileOutputStream outputStream = new FileOutputStream(file)){
+            outputStream.write(result.getImg());
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        this.modifiedImages.set(result.getVideoId(), this.modifiedImages.get(result.getVideoId()) + 1);
+        this.getContext().getLog().info(String.valueOf(this.modifiedImages.get(result.getVideoId())));
+
+        if (Objects.equals(this.modifiedImages.get(result.getVideoId()), this.nbrImages.get(result.getVideoId()))) {
+
+            String resultFolder = "result/" + result.getVideoId();
+
+            String[] cmdCartoon = {"python3", "python/video_export.py",
+                                    "-f", resultFolder + "/images",
+                                    "-a", resultFolder + "/audio/audio_SWMG.mp4.wav",
+                                    "-x", resultFolder + "/video"};
+
+            for (String line : PythonScriptRunner.run(cmdCartoon)){
+                this.getContext().getLog().info(line);
+            }
+        }
 
         if (this.unassignedTasks.isEmpty()){
             this.idleWorkers.add(modificationWorker);
             return this;
         }
         // I still don't know what task the worker could help me to solve ... but let me keep her busy.
-
-
-        // Once I found all unary INDs, I could check if this.discoverNaryDependencies is set to true and try to detect n-ary INDs as well
 
         Task task = this.unassignedTasks.remove();
         this.busyWorkers.put(modificationWorker, task);
