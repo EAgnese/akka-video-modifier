@@ -89,7 +89,7 @@ public class ModificationWorker extends AbstractBehavior<ModificationWorker.Mess
         return newReceiveBuilder()
                 .onMessage(ReceptionistListingMessage.class, this::handle)
                 .onMessage(TaskMessage.class, this::handle)
-                //.onMessage(ShutdownMessage.class, this::handle)
+                .onMessage(ShutdownMessage.class, this::handle)
                 .build();
     }
 
@@ -153,9 +153,8 @@ public class ModificationWorker extends AbstractBehavior<ModificationWorker.Mess
         return this;
     }
 
-//    private Behavior<Message> handle(ShutdownMessage message) {
-//        this.haveToShutDown = true;
-//        return this;
-//    }
+    private Behavior<Message> handle(ShutdownMessage message) {
+        return Behaviors.stopped();
+    }
 
 }

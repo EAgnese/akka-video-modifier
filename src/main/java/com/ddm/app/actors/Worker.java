@@ -78,6 +78,6 @@ public class Worker extends AbstractBehavior<Worker.Message> {
             worker.tell(new ModificationWorker.ShutdownMessage());
         }
 
-        return this;
+        return Behaviors.stopped();
     }
 }

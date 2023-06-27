@@ -212,10 +212,13 @@ public class VideoSequencer extends AbstractBehavior<VideoSequencer.Message> {
             String[] cmdCartoon = {"python3", "python/video_export.py",
                                     "-f", resultFolder + "/images",
                                     "-a", resultFolder + "/audio/audio_SWMG.mp4.wav",
-                                    "-x", resultFolder + "/video"};
+                                    "-x", resultFolder + "/videos"};
 
             for (String line : PythonScriptRunner.run(cmdCartoon)){
                 this.getContext().getLog().info(line);
+            }
+            if(this.isAllVideoExported()) {
+                this.end();
             }
         }
 
@@ -229,6 +232,17 @@ public class VideoSequencer extends AbstractBehavior<VideoSequencer.Message> {
         this.busyWorkers.put(modificationWorker, task);
         modificationWorker.tell(new ModificationWorker.TaskMessage(this.largeMessageProxy, task));
         return this;
+    }
+
+    private boolean isAllVideoExported() {
+        int i = 0;
+        while (i < this.modifiedImages.size()) {
+            if (!Objects.equals(this.modifiedImages.get(i), this.nbrImages.get(i))) {
+                return false;
+            }
+            i++;
+        }
+        return true;
     }
 
     private void end() {
