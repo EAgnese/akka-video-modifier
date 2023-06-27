@@ -47,7 +47,7 @@ def main():
         img_array.append(img)
     
     
-    out = cv2.VideoWriter(images_folder+'_TEMP_video.avi',cv2.VideoWriter_fourcc(*'DIVX'), 12, size)
+    out = cv2.VideoWriter(images_folder+'_TEMP_video.avi',cv2.VideoWriter_fourcc(*'DIVX'), 30, size)
     
     for i in range(len(img_array)):
         out.write(img_array[i])
