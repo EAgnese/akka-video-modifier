@@ -19,7 +19,8 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.util.HashMap;
 import java.util.Map;
-
+import java.util.regex.Pattern;
+import java.util.regex.Matcher;
 public class InputReader extends AbstractBehavior<InputReader.Message> {
 
     ////////////////////
@@ -47,18 +48,18 @@ public class InputReader extends AbstractBehavior<InputReader.Message> {
         return Behaviors.setup(context -> new InputReader(context, id, inputfile));
     }
 
-    private InputReader(ActorContext<Message> context,final int id, final File inputFile) throws IOException {
+    private InputReader(ActorContext<Message> context, final int id, final File inputFile) throws IOException {
         super(context);
         this.id = id;
-        this.videoName = inputFile.getName().replace('.','-');
+        this.videoName = inputFile.getName().replace('.', '-');
 
-        this.getContext().getLog().info("Creation of inputReader "+id);
+        this.getContext().getLog().info("Creation of inputReader " + id);
 
         //Getting the video's audio
         String[] cmdAudio = {"python3", "python/audio_extraction.py", "-p", inputFile.getPath(), "-x", "result/" + this.id + "/audio"};
         //String[] cmd = {"pwd"};
 
-        for (String line : PythonScriptRunner.run(cmdAudio)){
+        for (String line : PythonScriptRunner.run(cmdAudio)) {
             this.getContext().getLog().info(line);
         }
 
@@ -66,12 +67,12 @@ public class InputReader extends AbstractBehavior<InputReader.Message> {
         String[] cmdImages = {"python3", "python/video_images_extraction.py", "-p", inputFile.getPath(), "-x", "data/images"};
         //String[] cmd = {"pwd"};
 
-        for (String line : PythonScriptRunner.run(cmdImages)){
+        for (String line : PythonScriptRunner.run(cmdImages)) {
             this.getContext().getLog().info(line);
         }
 
-        SubtitleFrameMapper prout = new SubtitleFrameMapper(24,"data/SWMG_subtitles.txt");
-        this.subtitles = prout.mapFramesToSubtitles();
+        SubtitleFrameMapper frameMapper = new SubtitleFrameMapper(30, "data/SWMG_subtitles.txt");
+        this.subtitles = frameMapper.mapFramesToSubtitles();
 
     }
 
@@ -82,7 +83,7 @@ public class InputReader extends AbstractBehavior<InputReader.Message> {
     private final int id;
     private final String videoName;
 
-    private final Map<Integer,String> subtitles;
+    private final Map<Integer, String> subtitles;
 
 
     ////////////////////
@@ -104,22 +105,42 @@ public class InputReader extends AbstractBehavior<InputReader.Message> {
 
         File[] files = new File(path).listFiles();
 
-        if (files == null){
+        if (files == null) {
             throw new IOException("no images found");
         }
 
-        int i = 0;
-        for (File file : files){
+        for (File file : files) {
             byte[] content = Files.readAllBytes(file.toPath());
-            String sub = this.subtitles.get(i) != null ? this.subtitles.get(i) : "";
-
+            int frameNumber = frameNumberExtraction(file.getName());
+            String sub = this.subtitles.get(frameNumber) != null ? this.subtitles.get(frameNumber) : "";
             message.getReplyTo().tell(new VideoSequencer.ImageMessage(this.id, content, file.getName(), sub));
-            i++;
         }
         return this;
     }
 
     private Behavior<Message> handle(PostStop signal) throws IOException {
         return this;
+    }
+
+    private int frameNumberExtraction(String fileName) {
+
+        // Définir le modèle de l'expression régulière
+        String pattern = ".*?(\\d+)\\.jpg$";
+
+        // Créer un objet Pattern en compilant le modèle d'expression régulière
+        Pattern regex = Pattern.compile(pattern);
+
+        // Créer un objet Matcher en utilisant le modèle et le nom de fichier
+        Matcher matcher = regex.matcher(fileName);
+
+        // Vérifier si le nom de fichier correspond au modèle
+        if (matcher.matches()) {
+            // Extraire le numéro de frame à partir du groupe capturé
+            String frameNumberStr = matcher.group(1);
+
+            return Integer.parseInt(frameNumberStr);
+        } else {
+            return -1;
+        }
     }
 }
