@@ -8,7 +8,11 @@
 /dataSources.local.xml
 /data
 
+#Result
+/result
+
 # Compiled files
 /target
 /.idea
 python/__pycache__/
+
