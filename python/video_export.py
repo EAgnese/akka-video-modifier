@@ -3,6 +3,7 @@ import numpy as np
 import glob
 import re
 import os
+import utils
 
 from moviepy.editor import VideoFileClip, AudioFileClip
 import argparse
@@ -63,16 +64,16 @@ def main():
 
     # if end is not set, use video clip's end
     if not end:
-        end = video_clip.end
+        end = min(video_clip.end, audio_clip.end)
     # make sure audio clip is less than video clip in duration
     # setting the start & end of the audio clip to `start` and `end` paramters
     final_audio = audio_clip.subclip(start, end)
 
     # add the final audio to the video
     final_clip = video_clip.set_audio(final_audio)
-
+    utils.create_dir(export_folder)
     # save the final clip
-    final_clip.write_videofile(export_folder+"/"+ images_folder.replace("\\", "_") + "_final.mp4")
+    final_clip.write_videofile(export_folder+"/"+ images_folder.replace("/", "_") + "_final.mp4")
 
 
     os.remove(images_folder+'_TEMP_video.avi')

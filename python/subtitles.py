@@ -108,9 +108,6 @@ class Subtitles:
 
 
 def main():
-    print("main")
-    
-
     # make a command-line argument parser & add various parameters
     parser = argparse.ArgumentParser(description="Python script to add subtitles to an image")
     parser.add_argument("-p", "--image-path", help="Target image file")
