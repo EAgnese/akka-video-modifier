@@ -54,11 +54,19 @@ public class InputReader extends AbstractBehavior<InputReader.Message> {
 
         this.getContext().getLog().info("Creation of inputReader "+id);
 
-        String[] cmd = {"python3", "python/video_images_extraction.py", "-p", inputFile.getPath(), "-x", "data/images"};
-        this.getContext().getLog().info(inputFile.getPath());
+        //Getting the video's audio
+        String[] cmdAudio = {"python3", "python/audio_extraction.py", "-p", inputFile.getPath(), "-x", "result/" + this.id + "/audio"};
         //String[] cmd = {"pwd"};
 
-        for (String line : PythonScriptRunner.run(cmd)){
+        for (String line : PythonScriptRunner.run(cmdAudio)){
+            this.getContext().getLog().info(line);
+        }
+
+        //Cut the video frame by frame
+        String[] cmdImages = {"python3", "python/video_images_extraction.py", "-p", inputFile.getPath(), "-x", "data/images"};
+        //String[] cmd = {"pwd"};
+
+        for (String line : PythonScriptRunner.run(cmdImages)){
             this.getContext().getLog().info(line);
         }
 
@@ -74,7 +82,8 @@ public class InputReader extends AbstractBehavior<InputReader.Message> {
     private final int id;
     private final String videoName;
 
-    private Map<Integer,String> subtitles = new HashMap<>();
+    private final Map<Integer,String> subtitles;
+
 
     ////////////////////
     // Actor Behavior //
