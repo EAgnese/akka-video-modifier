@@ -57,6 +57,7 @@ public class VideoSequencer extends AbstractBehavior<VideoSequencer.Message> {
     public static class AudioMessage implements Message {
         private static final long serialVersionUID = -987456321236548969L;
         String audioPath;
+        int id;
     }
 
     @Getter
@@ -95,9 +96,12 @@ public class VideoSequencer extends AbstractBehavior<VideoSequencer.Message> {
         File[] inputFiles = InputConfigurationSingleton.get().getInputFiles();
         this.cartoon = InputConfigurationSingleton.get().isCartoon();
 
-        this.nbrImages = new ArrayList<>(inputFiles.length);
-        this.modifiedImages = new ArrayList<>(inputFiles.length);
-        this.inputReaders = new ArrayList<>(inputFiles.length);
+        int size = inputFiles.length;
+
+        this.nbrImages = new ArrayList<>(size);
+        this.modifiedImages = new ArrayList<>(size);
+        this.inputReaders = new ArrayList<>(size);
+        this.audioPaths = new ArrayList<>(size);
 
         for (int id = 0; id < inputFiles.length; id++){
             this.inputReaders.add(context.spawn(InputReader.create(id, inputFiles[id]), InputReader.DEFAULT_NAME + "_" + id));
@@ -118,7 +122,7 @@ public class VideoSequencer extends AbstractBehavior<VideoSequencer.Message> {
 
     private long startTime;
 
-    private String audioPath;
+    private List<String> audioPaths;
     private final List<ActorRef<InputReader.Message>> inputReaders;
     private final List<ActorRef<ModificationWorker.Message>> modificationWorkers;
     private final ActorRef<ResultCollector.Message> resultCollector;
@@ -176,7 +180,7 @@ public class VideoSequencer extends AbstractBehavior<VideoSequencer.Message> {
     }
 
     private Behavior<Message> handle(AudioMessage message){
-        this.audioPath = message.getAudioPath();
+        this.audioPaths.add(message.getId(), message.getAudioPath());
         return this;
     }
 
@@ -226,17 +230,18 @@ public class VideoSequencer extends AbstractBehavior<VideoSequencer.Message> {
 
         if (Objects.equals(this.modifiedImages.get(videoId), this.nbrImages.get(videoId))) {
 
+            this.getContext().getLog().info("Merging the video number {}", videoId);
+
             String resultFolder = "result/" + result.getVideoName();
 
             String[] cmdCartoon = {"python3", "python/video_export.py",
                                     "-f", resultFolder + "/images",
-                                    "-a", this.audioPath,
+                                    "-a", this.audioPaths.get(videoId),
                                     "-x", resultFolder + "/videos"};
 
             for (String line : PythonScriptRunner.run(cmdCartoon)){
                 this.getContext().getLog().info(line);
             }
-            this.getContext().getLog().info("Merging the video number {}", videoId);
             if(this.isAllVideoExported()) {
                 this.end();
             }

@@ -18,6 +18,7 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.util.Map;
+import java.util.Objects;
 import java.util.regex.Pattern;
 import java.util.regex.Matcher;
 public class InputReader extends AbstractBehavior<InputReader.Message> {
@@ -43,7 +44,7 @@ public class InputReader extends AbstractBehavior<InputReader.Message> {
 
     public static final String DEFAULT_NAME = "inputReader";
 
-    private final String audioPath;
+    private String audioPath;
 
     public static Behavior<Message> create(final int id, final File inputfile) {
         return Behaviors.setup(context -> new InputReader(context, id, inputfile));
@@ -57,9 +58,13 @@ public class InputReader extends AbstractBehavior<InputReader.Message> {
         this.getContext().getLog().info("Creation of inputReader " + id);
 
         //Getting the video's audio
-        this.audioPath = "result/" + this.videoName + "/audio";
-        String[] cmdAudio = {"python3", "python/audio_extraction.py", "-p", inputFile.getPath(), "-x", this.audioPath};
+        String audioDirectory = "result/" + this.videoName + "/audio";
+        String[] cmdAudio = {"python3", "python/audio_extraction.py", "-p", inputFile.getPath(), "-x", audioDirectory};
         //String[] cmd = {"pwd"};
+
+        for (File audioFile : Objects.requireNonNull(new File(audioDirectory).listFiles())){
+            this.audioPath = audioFile.getPath();
+        }
 
         for (String line : PythonScriptRunner.run(cmdAudio)) {
             this.getContext().getLog().info(line);
@@ -104,7 +109,7 @@ public class InputReader extends AbstractBehavior<InputReader.Message> {
 
         this.getContext().getLog().info("Reading video " + this.id);
 
-        message.getReplyTo().tell(new VideoSequencer.AudioMessage(this.audioPath));
+        message.getReplyTo().tell(new VideoSequencer.AudioMessage(this.audioPath, this.id));
 
         String path = "data/images/" + this.videoName + "/";
 
