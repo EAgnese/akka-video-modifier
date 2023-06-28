@@ -230,7 +230,7 @@ public class VideoSequencer extends AbstractBehavior<VideoSequencer.Message> {
 
             String[] cmdCartoon = {"python3", "python/video_export.py",
                                     "-f", resultFolder + "/images",
-                                    "-a", resultFolder + "/audio/" + this.audioPath,
+                                    "-a", this.audioPath,
                                     "-x", resultFolder + "/videos"};
 
             for (String line : PythonScriptRunner.run(cmdCartoon)){
