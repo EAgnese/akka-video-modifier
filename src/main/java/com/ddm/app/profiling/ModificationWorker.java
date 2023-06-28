@@ -102,7 +102,7 @@ public class ModificationWorker extends AbstractBehavior<ModificationWorker.Mess
     }
 
     private Behavior<Message> handle(TaskMessage message) {
-        // I should probably know how to solve this task, but for now I just pretend some work...
+
 
         Task task = message.getTask();
         String imgName = task.getImgName();
