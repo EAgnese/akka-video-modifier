@@ -49,7 +49,7 @@ public class InputReader extends AbstractBehavior<InputReader.Message> {
         return Behaviors.setup(context -> new InputReader(context, id, inputfile));
     }
 
-    private InputReader(ActorContext<Message> context, final int id, final File inputFile) throws IOException {
+    private InputReader(ActorContext<Message> context, final int id, final File inputFile) {
         super(context);
         this.id = id;
         this.videoName = inputFile.getName().replace('.', '-');
@@ -123,7 +123,7 @@ public class InputReader extends AbstractBehavior<InputReader.Message> {
         return this;
     }
 
-    private Behavior<Message> handle(PostStop signal) throws IOException {
+    private Behavior<Message> handle(PostStop signal) /*throws IOException*/ {
         return this;
     }
 
