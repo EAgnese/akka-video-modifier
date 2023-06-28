@@ -17,6 +17,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import java.io.FileOutputStream;
+import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -101,7 +102,6 @@ public class ModificationWorker extends AbstractBehavior<ModificationWorker.Mess
     }
 
     private Behavior<Message> handle(TaskMessage message) {
-        this.getContext().getLog().info("Working!");
         // I should probably know how to solve this task, but for now I just pretend some work...
 
         Task task = message.getTask();
@@ -147,9 +147,12 @@ public class ModificationWorker extends AbstractBehavior<ModificationWorker.Mess
         LargeMessageProxy.LargeMessage completionMessage = new VideoSequencer.CompletionMessage(this.getContext().getSelf(), result);
         this.largeMessageProxy.tell(new LargeMessageProxy.SendMessage(completionMessage, message.getVideoSequencerLargeMessageProxy()));
 
-//        if (this.haveToShutDown){
-//            return Behaviors.stopped();
-//        }
+        File img = new File(imgName);
+        if(!img.delete()){
+            this.getContext().getLog().error("Unable to delete : " + imgName);
+        };
+
+
         return this;
     }
 
