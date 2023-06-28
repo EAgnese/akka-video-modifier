@@ -80,10 +80,12 @@ public class VideoSequencer extends AbstractBehavior<VideoSequencer.Message> {
         return Behaviors.setup(VideoSequencer::new);
     }
 
+    public boolean cartoon;
+
     private VideoSequencer(ActorContext<Message> context) {
         super(context);
         File[] inputFiles = InputConfigurationSingleton.get().getInputFiles();
-
+        this.cartoon = InputConfigurationSingleton.get().isCartoon();
 
         this.nbrImages = new ArrayList<>(inputFiles.length);
         this.modifiedImages = new ArrayList<>(inputFiles.length);
@@ -148,7 +150,7 @@ public class VideoSequencer extends AbstractBehavior<VideoSequencer.Message> {
 
         this.nbrImages.set(message.getId(), this.nbrImages.get(message.getId()) + 1)  ;
 
-        Task task = new Task(message.getImage(), message.getName(), message.getSubtitles(), false, message.getId(), message.getVideoName());
+        Task task = new Task(message.getImage(), message.getName(), message.getSubtitles(), this.cartoon, message.getId(), message.getVideoName());
 
         if (!this.idleWorkers.isEmpty()){
             ActorRef<ModificationWorker.Message> newModificationWorker = this.idleWorkers.remove();

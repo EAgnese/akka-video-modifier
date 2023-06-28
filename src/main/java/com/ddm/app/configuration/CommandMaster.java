@@ -12,7 +12,10 @@ public class CommandMaster extends Command {
     int getDefaultPort() {
         return SystemConfiguration.DEFAULT_MASTER_PORT;
     }
-    @Parameter(names = {"-ip", "--inputPath"}, description = "Input path for the input data; all files in this folder are considered", required = false, arity = 1)
+    @Parameter(names = {"-ip", "--inputPath"}, description = "Input path for the input data; all files in this folder are considered", arity = 1)
     String inputPath = InputConfigurationSingleton.get().getInputPath();
+
+    @Parameter(names = {"-c", "--cartoon"}, description = "Enable the videos\' modification into a cartoon", arity = 0)
+    boolean cartoon;
 
 }
