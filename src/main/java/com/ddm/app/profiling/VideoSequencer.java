@@ -54,6 +54,14 @@ public class VideoSequencer extends AbstractBehavior<VideoSequencer.Message> {
     @Getter
     @NoArgsConstructor
     @AllArgsConstructor
+    public static class AudioMessage implements Message {
+        private static final long serialVersionUID = -987456321236548969L;
+        String audioPath;
+    }
+
+    @Getter
+    @NoArgsConstructor
+    @AllArgsConstructor
     public static class RegistrationMessage implements Message {
         private static final long serialVersionUID = -4025238529984914107L;
         ActorRef<ModificationWorker.Message> ModificationWorker;
@@ -109,6 +117,8 @@ public class VideoSequencer extends AbstractBehavior<VideoSequencer.Message> {
     /////////////////
 
     private long startTime;
+
+    private String audioPath;
     private final List<ActorRef<InputReader.Message>> inputReaders;
     private final List<ActorRef<ModificationWorker.Message>> modificationWorkers;
     private final ActorRef<ResultCollector.Message> resultCollector;
@@ -132,6 +142,7 @@ public class VideoSequencer extends AbstractBehavior<VideoSequencer.Message> {
         return newReceiveBuilder()
                 .onMessage(StartMessage.class, this::handle)
                 .onMessage(ImageMessage.class, this::handle)
+                .onMessage(AudioMessage.class, this::handle)
                 .onMessage(RegistrationMessage.class, this::handle)
                 .onMessage(CompletionMessage.class, this::handle)
                 .onSignal(Terminated.class, this::handle)
@@ -161,6 +172,11 @@ public class VideoSequencer extends AbstractBehavior<VideoSequencer.Message> {
             this.unassignedTasks.add(task);
         }
 
+        return this;
+    }
+
+    private Behavior<Message> handle(AudioMessage message){
+        this.audioPath = message.getAudioPath();
         return this;
     }
 
@@ -214,7 +230,7 @@ public class VideoSequencer extends AbstractBehavior<VideoSequencer.Message> {
 
             String[] cmdCartoon = {"python3", "python/video_export.py",
                                     "-f", resultFolder + "/images",
-                                    "-a", resultFolder + "/audio/audio_SWMG.mp4.wav",
+                                    "-a", resultFolder + "/audio/" + this.audioPath,
                                     "-x", resultFolder + "/videos"};
 
             for (String line : PythonScriptRunner.run(cmdCartoon)){
