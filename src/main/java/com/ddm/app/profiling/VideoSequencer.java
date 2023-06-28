@@ -45,6 +45,7 @@ public class VideoSequencer extends AbstractBehavior<VideoSequencer.Message> {
     public static class ImageMessage implements Message {
         private static final long serialVersionUID = 4591192372652568030L;
         int id;
+        String videoName;
         byte[] image;
         String name;
         String subtitles;
@@ -111,9 +112,9 @@ public class VideoSequencer extends AbstractBehavior<VideoSequencer.Message> {
     private final ActorRef<ResultCollector.Message> resultCollector;
     private final ActorRef<LargeMessageProxy.Message> largeMessageProxy;
 
-    private ArrayList<Integer> nbrImages;
+    private final ArrayList<Integer> nbrImages;
 
-    private ArrayList<Integer> modifiedImages;
+    private final ArrayList<Integer> modifiedImages;
 
     private final Queue<Task> unassignedTasks = new LinkedList<>();
     private final Queue<ActorRef<ModificationWorker.Message>> idleWorkers = new LinkedList<>();
@@ -146,9 +147,8 @@ public class VideoSequencer extends AbstractBehavior<VideoSequencer.Message> {
     private Behavior<Message> handle(ImageMessage message) {
 
         this.nbrImages.set(message.getId(), this.nbrImages.get(message.getId()) + 1)  ;
-        this.getContext().getLog().info(String.valueOf(this.nbrImages.get(message.getId())));
 
-        Task task = new Task(message.getImage(), message.getName(), message.getSubtitles(), false, message.getId());
+        Task task = new Task(message.getImage(), message.getName(), message.getSubtitles(), false, message.getId(), message.getVideoName());
 
         if (!this.idleWorkers.isEmpty()){
             ActorRef<ModificationWorker.Message> newModificationWorker = this.idleWorkers.remove();
@@ -186,12 +186,14 @@ public class VideoSequencer extends AbstractBehavior<VideoSequencer.Message> {
     private Behavior<Message> handle(CompletionMessage message) {
         ActorRef<ModificationWorker.Message> modificationWorker = message.getModificationWorker();
         Result result = message.getResult();
+        int videoId = result.getVideoId();
+        String videoName = result.getVideoName();
 
-        File file = new File("result/" + result.getVideoId() + "/images/" + result.getImgName());
+        File file = new File("result/" + videoName + "/images/" + result.getImgName());
 
         File parentDirectory = file.getParentFile();
         if (parentDirectory != null) {
-            parentDirectory.mkdirs(); // Créer les répertoires parents si nécessaire
+            parentDirectory.mkdirs(); // Create parents directory id necessary
         }
 
 
@@ -202,12 +204,11 @@ public class VideoSequencer extends AbstractBehavior<VideoSequencer.Message> {
             e.printStackTrace();
         }
 
-        this.modifiedImages.set(result.getVideoId(), this.modifiedImages.get(result.getVideoId()) + 1);
-        this.getContext().getLog().info(String.valueOf(this.modifiedImages.get(result.getVideoId())));
+        this.modifiedImages.set(videoId, this.modifiedImages.get(videoId) + 1);
 
-        if (Objects.equals(this.modifiedImages.get(result.getVideoId()), this.nbrImages.get(result.getVideoId()))) {
+        if (Objects.equals(this.modifiedImages.get(videoId), this.nbrImages.get(videoId))) {
 
-            String resultFolder = "result/" + result.getVideoId();
+            String resultFolder = "result/" + result.getVideoName();
 
             String[] cmdCartoon = {"python3", "python/video_export.py",
                                     "-f", resultFolder + "/images",
@@ -217,6 +218,7 @@ public class VideoSequencer extends AbstractBehavior<VideoSequencer.Message> {
             for (String line : PythonScriptRunner.run(cmdCartoon)){
                 this.getContext().getLog().info(line);
             }
+            this.getContext().getLog().info("Merging the video number {}", videoId);
             if(this.isAllVideoExported()) {
                 this.end();
             }
@@ -226,7 +228,6 @@ public class VideoSequencer extends AbstractBehavior<VideoSequencer.Message> {
             this.idleWorkers.add(modificationWorker);
             return this;
         }
-        // I still don't know what task the worker could help me to solve ... but let me keep her busy.
 
         Task task = this.unassignedTasks.remove();
         this.busyWorkers.put(modificationWorker, task);
@@ -248,7 +249,7 @@ public class VideoSequencer extends AbstractBehavior<VideoSequencer.Message> {
     private void end() {
         this.resultCollector.tell(new ResultCollector.FinalizeMessage());
         long discoveryTime = System.currentTimeMillis() - this.startTime;
-        this.getContext().getLog().info("Finished mining within {} ms!", discoveryTime);
+        this.getContext().getLog().info("Finished modifying videos within {} ms!", discoveryTime);
     }
 
     private Behavior<Message> handle(Terminated signal) {

@@ -9,4 +9,5 @@ public class Result {
     byte[] img;
     String imgName;
     int videoId;
+    String videoName;
 }

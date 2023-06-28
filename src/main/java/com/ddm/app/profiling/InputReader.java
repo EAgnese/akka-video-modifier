@@ -56,7 +56,7 @@ public class InputReader extends AbstractBehavior<InputReader.Message> {
         this.getContext().getLog().info("Creation of inputReader " + id);
 
         //Getting the video's audio
-        String[] cmdAudio = {"python3", "python/audio_extraction.py", "-p", inputFile.getPath(), "-x", "result/" + this.id + "/audio"};
+        String[] cmdAudio = {"python3", "python/audio_extraction.py", "-p", inputFile.getPath(), "-x", "result/" + this.videoName + "/audio"};
         //String[] cmd = {"pwd"};
 
         for (String line : PythonScriptRunner.run(cmdAudio)) {
@@ -113,7 +113,7 @@ public class InputReader extends AbstractBehavior<InputReader.Message> {
             byte[] content = Files.readAllBytes(file.toPath());
             int frameNumber = frameNumberExtraction(file.getName());
             String sub = this.subtitles.get(frameNumber) != null ? this.subtitles.get(frameNumber) : "";
-            message.getReplyTo().tell(new VideoSequencer.ImageMessage(this.id, content, file.getName(), sub));
+            message.getReplyTo().tell(new VideoSequencer.ImageMessage(this.id, this.videoName, content, file.getName(), sub));
         }
         return this;
     }

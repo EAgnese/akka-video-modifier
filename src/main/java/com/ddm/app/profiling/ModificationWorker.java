@@ -135,11 +135,11 @@ public class ModificationWorker extends AbstractBehavior<ModificationWorker.Mess
 
         try {
             byte[] content = Files.readAllBytes(Paths.get(imgName));
-            result = new Result(content,imgName,message.getTask().getVideoId());
+            result = new Result(content,imgName,message.getTask().getVideoId(), message.getTask().getVideoName());
         } catch (IOException e) {
             this.getContext().getLog().error(e.getMessage());
             byte[] content = {};
-            result = new Result(content,imgName,message.getTask().getVideoId());
+            result = new Result(content,imgName,message.getTask().getVideoId(), message.getTask().getVideoName());
         }
 
         // TODO : handle correctly a fail in this worker
