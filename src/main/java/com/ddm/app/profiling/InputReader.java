@@ -62,12 +62,12 @@ public class InputReader extends AbstractBehavior<InputReader.Message> {
         String[] cmdAudio = {"python3", "python/audio_extraction.py", "-p", inputFile.getPath(), "-x", audioDirectory};
         //String[] cmd = {"pwd"};
 
-        for (File audioFile : Objects.requireNonNull(new File(audioDirectory).listFiles())){
-            this.audioPath = audioFile.getPath();
-        }
-
         for (String line : PythonScriptRunner.run(cmdAudio)) {
             this.getContext().getLog().info(line);
+        }
+
+        for (File audioFile : Objects.requireNonNull(new File(audioDirectory).listFiles())){
+            this.audioPath = audioFile.getPath();
         }
 
         //Cut the video frame by frame
