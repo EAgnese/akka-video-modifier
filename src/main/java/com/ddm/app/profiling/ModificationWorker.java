@@ -11,6 +11,7 @@ import com.ddm.app.Result;
 import com.ddm.app.Task;
 import com.ddm.app.actors.patterns.LargeMessageProxy;
 import com.ddm.app.serialization.AkkaSerializable;
+import com.ddm.app.singletons.SystemConfigurationSingleton;
 import com.ddm.app.utils.PythonScriptRunner;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -107,6 +108,8 @@ public class ModificationWorker extends AbstractBehavior<ModificationWorker.Mess
         Task task = message.getTask();
         String imgName = task.getImgName();
 
+        String pythoncommand = SystemConfigurationSingleton.get().getPythoncommand();
+
         //save the image we get through the Task
         try (FileOutputStream outputStream = new FileOutputStream(imgName)){
             outputStream.write(task.getImg());
@@ -116,7 +119,7 @@ public class ModificationWorker extends AbstractBehavior<ModificationWorker.Mess
 
         //If the video has to be cartoonified, launch the cartoon script
         if (task.isCartoon()){
-            String[] cmdCartoon = {"python3", "python/cartoon.py", "-p", imgName};
+            String[] cmdCartoon = {pythoncommand, "python/cartoon.py", "-p", imgName};
 
             for (String line : PythonScriptRunner.run(cmdCartoon)){
                 this.getContext().getLog().info(line);
@@ -124,7 +127,7 @@ public class ModificationWorker extends AbstractBehavior<ModificationWorker.Mess
         }
 
         //Script for the subtitles
-        String[] cmdSubtitles = {"python3", "python/subtitles.py", "-p", imgName, "-s", task.getSubtitles()};
+        String[] cmdSubtitles = {pythoncommand, "python/subtitles.py", "-p", imgName, "-s", task.getSubtitles()};
         //String[] cmd = {"pwd"};
 
         for (String line : PythonScriptRunner.run(cmdSubtitles)){

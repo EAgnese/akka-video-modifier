@@ -14,6 +14,7 @@ import com.ddm.app.Task;
 import com.ddm.app.actors.patterns.LargeMessageProxy;
 import com.ddm.app.serialization.AkkaSerializable;
 import com.ddm.app.singletons.InputConfigurationSingleton;
+import com.ddm.app.singletons.SystemConfigurationSingleton;
 import com.ddm.app.utils.PythonScriptRunner;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -154,6 +155,10 @@ public class VideoSequencer extends AbstractBehavior<VideoSequencer.Message> {
     }
 
     private Behavior<Message> handle(StartMessage message) {
+        System.out.println("Press <enter> to start!");
+        try (final Scanner scanner = new Scanner(System.in)) {
+            scanner.nextLine();
+        }
         for (ActorRef<InputReader.Message> inputReader : this.inputReaders)
             inputReader.tell(new InputReader.ReadVideoMessage(this.getContext().getSelf()));
 
@@ -234,7 +239,9 @@ public class VideoSequencer extends AbstractBehavior<VideoSequencer.Message> {
 
             String resultFolder = "result/" + result.getVideoName();
 
-            String[] cmdCartoon = {"python3", "python/video_export.py",
+            String pythoncommand = SystemConfigurationSingleton.get().getPythoncommand();
+
+            String[] cmdCartoon = {pythoncommand, "python/video_export.py",
                                     "-f", resultFolder + "/images",
                                     "-a", this.audioPaths.get(videoId),
                                     "-x", resultFolder + "/videos"};

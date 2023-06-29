@@ -16,6 +16,8 @@ public class SystemConfiguration {
     public static final int DEFAULT_MASTER_PORT = 7877;
     public static final int DEFAULT_WORKER_PORT = 7879;
 
+    public static final String DEFAULT_PYTHON_COMMAND = "python3";
+
     private String role = MASTER_ROLE;                 // This machine's role in the cluster.
 
     private String host = getDefaultHost();            // This machine's host name or IP that we use to bind this application against
@@ -28,6 +30,8 @@ public class SystemConfiguration {
 
     private int numWorkers = 4;                        // The number of workers to start locally; should be at least one if the algorithm is started standalone (otherwise there are no workers to run the application)
 
+
+    private String pythoncommand = DEFAULT_PYTHON_COMMAND; // The python command used to launch python script
     private static String getDefaultHost() {
         try {
             return InetAddress.getLocalHost().getHostAddress();
@@ -43,6 +47,7 @@ public class SystemConfiguration {
         this.masterHost = commandMaster.host;
         this.masterPort = commandMaster.port;
         this.numWorkers = commandMaster.numWorkers;
+        this.pythoncommand = commandMaster.pythoncommand;
     }
 
     public void update(CommandWorker commandWorker) {
@@ -52,6 +57,7 @@ public class SystemConfiguration {
         this.masterHost = commandWorker.masterhost;
         this.masterPort = commandWorker.masterport;
         this.numWorkers = commandWorker.numWorkers;
+        this.pythoncommand = commandWorker.pythoncommand;
     }
 
     public Config toAkkaConfig() {

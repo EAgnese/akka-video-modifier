@@ -8,6 +8,7 @@ import akka.actor.typed.javadsl.ActorContext;
 import akka.actor.typed.javadsl.Behaviors;
 import akka.actor.typed.javadsl.Receive;
 import com.ddm.app.serialization.AkkaSerializable;
+import com.ddm.app.singletons.SystemConfigurationSingleton;
 import com.ddm.app.utils.PythonScriptRunner;
 import com.ddm.app.utils.SubtitleFrameMapper;
 import lombok.AllArgsConstructor;
@@ -59,7 +60,8 @@ public class InputReader extends AbstractBehavior<InputReader.Message> {
 
         //Getting the video's audio
         String audioDirectory = "result/" + this.videoName + "/audio";
-        String[] cmdAudio = {"python3", "python/audio_extraction.py", "-p", inputFile.getPath(), "-x", audioDirectory};
+        String pythoncommand = SystemConfigurationSingleton.get().getPythoncommand();
+        String[] cmdAudio = {pythoncommand, "python/audio_extraction.py", "-p", inputFile.getPath(), "-x", audioDirectory};
         //String[] cmd = {"pwd"};
 
         for (String line : PythonScriptRunner.run(cmdAudio)) {
@@ -71,7 +73,7 @@ public class InputReader extends AbstractBehavior<InputReader.Message> {
         }
 
         //Cut the video frame by frame
-        String[] cmdImages = {"python3", "python/video_images_extraction.py", "-p", inputFile.getPath(), "-x", "data/images"};
+        String[] cmdImages = {pythoncommand, "python/video_images_extraction.py", "-p", inputFile.getPath(), "-x", "data/images"};
         //String[] cmd = {"pwd"};
 
         for (String line : PythonScriptRunner.run(cmdImages)) {

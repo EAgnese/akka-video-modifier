@@ -19,6 +19,9 @@ public abstract class Command {
     @Parameter(names = {"-w", "--numWorkers"}, description = "The number of workers (indexers/validators) to start locally; should be at least one if the algorithm is started standalone (otherwise there are no workers to run the discovery)", required = false)
     int numWorkers = SystemConfigurationSingleton.get().getNumWorkers();
 
+    @Parameter(names = {"-pc", "--pythoncommand"}, description = "Python command used to launch python script", required = false)
+    String pythoncommand = SystemConfiguration.DEFAULT_PYTHON_COMMAND;
+
     public static void applyOn(String[] args) {
         CommandMaster commandMaster = new CommandMaster();
         CommandWorker commandWorker = new CommandWorker();
