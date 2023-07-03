@@ -11,7 +11,7 @@ class Subtitles:
     The Subtitles class defines methods for calculating the size and placement of text on an image, and
     for adding text to an image.
     """
-    def __init__(self, text:str, image_path:str, font_scale:int, thickness:int, color:tuple[int, int, int], bottom_padding_percentage, line_spacing:int, font:int) -> None:
+    def __init__(self, text:str, image_path:str, font_scale:int, thickness:int, color, bottom_padding_percentage, line_spacing:int, font:int) -> None:
         self.text = text
         self.font_scale = font_scale
         self.thickness = thickness
@@ -28,7 +28,7 @@ class Subtitles:
         """
         return self.text.count('\n') + 1
 
-    def getTextSize(self) -> tuple[int, int]:
+    def getTextSize(self):
         """
         This function returns the size of the text based on the font, font scale, and thickness.
         :return: A tuple of two integers representing the size of the text when rendered with the
