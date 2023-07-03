@@ -2,9 +2,18 @@ README of akka-video-modifier
 
 # <font color="blue"> What is it ?</font>
 
-akka-video-modifier is a java program that use the Akka library to modify some videos. The modifications available are currently to add subtitles and add a cartoon filter. The modifications are done with Python scripts.
+akka-video-modifier is a java program that use the Akka library to modify some videos. 
+The modifications available are currently to add subtitles and add a cartoon filter. 
+The modifications are done with Python scripts.
 
-The programm have two parts. One is the master part, that dsitributes tasks (modifying one frame one the movie) to the other part, the workers. The workers then handle the tasks and send back the results.
+The program has two parts : one is the master part, that distributes tasks, the other is the worker that handle 
+those tasks and send back the results. Here a task is a modification on a unique frame of a video. 
+
+A worker can be launched on the same machine as the master, or on another one. 
+Multiple workers can be launched on multiple machines, all connected to the master.
+This makes it possible to parallelize tasks and increase the execution speed based on the number of machines.
+
+For example, we tested this on a 12 raspberry pi cluster (~420 €) and it was X times faster than a 600€ computer.
 
 
 # <font color="blue"> How to use it</font>
@@ -38,6 +47,15 @@ master      Start a master ActorSystem.
       -p, --port
         This machines port that we use to bind this application against
         Default: 7877
+      -pc, --pythoncommand
+        Python command used to launch python script
+        Default: python3
+```
+
+### Example Linux command for raspberries cluster's master
+
+```bash
+java -jar jar/akka-video-modifier.jar master -w 0 -h 10.42.0.1 -c
 ```
 
 
@@ -65,6 +83,17 @@ worker      Start a worker ActorSystem.
       -p, --port
         This machines port that we use to bind this application against
         Default: 7879
+      -pc, --pythoncommand
+        Python command used to launch python script
+        Default: python3
+```
+
+### Example Linux command for raspberries cluster
+
+We were using a raspberry cluster where raspberry hostname was piXX (with XX a number between 01 and 12) so we used this to set up ports and host address.
+The master IP was 10.42.0.1
+```bash
+java -jar jar/akka-video-modifier.jar worker -w 4 -mh 10.42.0.1 -p $(expr 7879 + $(hostname | grep -o '[0-9]\+')) -h $(hostname).local -pc python3
 ```
 
 # <font color="blue"> Python scripts</font>
