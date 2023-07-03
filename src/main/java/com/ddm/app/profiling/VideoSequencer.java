@@ -15,6 +15,7 @@ import com.ddm.app.actors.patterns.LargeMessageProxy;
 import com.ddm.app.serialization.AkkaSerializable;
 import com.ddm.app.singletons.InputConfigurationSingleton;
 import com.ddm.app.singletons.SystemConfigurationSingleton;
+import com.ddm.app.utils.ContentDeleter;
 import com.ddm.app.utils.PythonScriptRunner;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -123,7 +124,7 @@ public class VideoSequencer extends AbstractBehavior<VideoSequencer.Message> {
 
     private long startTime;
 
-    private List<String> audioPaths;
+    private final List<String> audioPaths;
     private final List<ActorRef<InputReader.Message>> inputReaders;
     private final List<ActorRef<ModificationWorker.Message>> modificationWorkers;
     private final ActorRef<ResultCollector.Message> resultCollector;
@@ -278,6 +279,14 @@ public class VideoSequencer extends AbstractBehavior<VideoSequencer.Message> {
 
     private void end() {
         this.resultCollector.tell(new ResultCollector.FinalizeMessage());
+
+        File imagesDirectory = new File("data/images");
+        ContentDeleter.delete(imagesDirectory);
+
+        for(String audiopath : this.audioPaths){
+            ContentDeleter.delete(new File(audiopath));
+        }
+
         long discoveryTime = System.currentTimeMillis() - this.startTime;
         this.getContext().getLog().info("Finished modifying videos within {} ms!", discoveryTime);
     }
