@@ -17,6 +17,7 @@ import com.ddm.app.singletons.InputConfigurationSingleton;
 import com.ddm.app.singletons.SystemConfigurationSingleton;
 import com.ddm.app.utils.ContentDeleter;
 import com.ddm.app.utils.PythonScriptRunner;
+import com.ddm.app.utils.VideoFPSReader;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -242,12 +243,19 @@ public class VideoSequencer extends AbstractBehavior<VideoSequencer.Message> {
 
             String pythoncommand = SystemConfigurationSingleton.get().getPythoncommand();
 
-            String[] cmdCartoon = {pythoncommand, "python/video_export.py",
-                                    "-f", resultFolder + "/images",
-                                    "-a", this.audioPaths.get(videoId),
-                                    "-x", resultFolder + "/videos"};
+            VideoFPSReader reader = VideoFPSReader.getInstance();
+            HashMap<String, Integer> videoFPSMap = reader.getVideoFPS("", "data/fps.json");
+            int videoFps = videoFPSMap.get(videoName);
 
-            for (String line : PythonScriptRunner.run(cmdCartoon)){
+            String[] cmdExport = {
+                    pythoncommand, "python/video_export.py",
+                    "-f", resultFolder + "/images",
+                    "-a", this.audioPaths.get(videoId),
+                    "-x", resultFolder + "/videos",
+                    "-F", Integer.toString(videoFps)
+            };
+
+            for (String line : PythonScriptRunner.run(cmdExport)){
                 this.getContext().getLog().info(line);
             }
             if(this.isAllVideoExported()) {
@@ -284,7 +292,7 @@ public class VideoSequencer extends AbstractBehavior<VideoSequencer.Message> {
         ContentDeleter.delete(imagesDirectory);
 
         for(String audiopath : this.audioPaths){
-            ContentDeleter.delete(new File(audiopath));
+            ContentDeleter.delete(new File(audiopath).getParentFile());
         }
 
         long discoveryTime = System.currentTimeMillis() - this.startTime;
