@@ -11,13 +11,14 @@ import argparse
 def main():
 
     # make a command-line argument parser & add various parameters
-    parser = argparse.ArgumentParser(description="Python script to add audio to video clip")
+    parser = argparse.ArgumentParser(description="Python script to merge several images into a video and add the audio to it")
     parser.add_argument("-f", "--images-folder", help="Target images folder to create video with")
     parser.add_argument("-a", "--audio-file", help="Target audio file to embed with the video")
     parser.add_argument("-x", "--export-folder", help="Folder where the vdeo will be exported, default is current directory", default=".")
     parser.add_argument("-s", "--start", help="Start duration of the audio file, default is 0", default=0, type=int)
     parser.add_argument("-e", "--end", help="The end duration of the audio file, default is the length of the video file", type=int)
     parser.add_argument("-v", "--volume-factor", type=float, default=1.0, help="The volume factor to multiply by the volume of the audio file, 1 means no change, below 1 will decrease volume, above will increase.")
+    parser.add_argument("-F", "--frame-rate", help="Frame rate of the video, default is 30fps", type=int, default=30)
     # parse the arguments
     args = parser.parse_args()
     images_folder = args.images_folder
@@ -25,6 +26,7 @@ def main():
     export_folder = args.export_folder
     start = args.start
     end = args.end
+    frame_rate = args.frame_rate
     volume_factor = args.volume_factor
     # print the passed parameters, just for logging
     print(vars(args))
@@ -36,6 +38,7 @@ def main():
 
     img_array = []
     numbers = re.compile(r'(\d+)')
+
     def numericalSort(value):
         parts = numbers.split(value)
         parts[1::2] = map(int, parts[1::2])
@@ -46,9 +49,9 @@ def main():
         height, width, layers = img.shape
         size = (width,height)
         img_array.append(img)
+
     
-    
-    out = cv2.VideoWriter(images_folder+'_TEMP_video.avi',cv2.VideoWriter_fourcc(*'DIVX'), 30, size)
+    out = cv2.VideoWriter(images_folder+'_TEMP_video.avi',cv2.VideoWriter_fourcc(*'DIVX'), frame_rate, size)
     
     for i in range(len(img_array)):
         out.write(img_array[i])

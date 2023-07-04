@@ -11,6 +11,7 @@ import com.ddm.app.serialization.AkkaSerializable;
 import com.ddm.app.singletons.SystemConfigurationSingleton;
 import com.ddm.app.utils.PythonScriptRunner;
 import com.ddm.app.utils.SubtitleFrameMapper;
+import com.ddm.app.utils.VideoFPSReader;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -18,6 +19,7 @@ import lombok.NoArgsConstructor;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 import java.util.regex.Pattern;
@@ -74,13 +76,17 @@ public class InputReader extends AbstractBehavior<InputReader.Message> {
 
         //Cut the video frame by frame
         String[] cmdImages = {pythoncommand, "python/video_images_extraction.py", "-p", inputFile.getPath(), "-x", "data/images"};
-        //String[] cmd = {"pwd"};
+
 
         for (String line : PythonScriptRunner.run(cmdImages)) {
             this.getContext().getLog().info(line);
         }
 
-        SubtitleFrameMapper frameMapper = new SubtitleFrameMapper(30, "data/SWMG_subtitles.txt");
+        VideoFPSReader reader = VideoFPSReader.getInstance();
+        HashMap<String, Integer> videoFPSMap = reader.getVideoFPS(inputFile.getParentFile().getPath(), "data/fps.json");
+        int videoFps = videoFPSMap.get(this.videoName);
+
+        SubtitleFrameMapper frameMapper = new SubtitleFrameMapper(videoFps, "data/subtitles/"+ videoName +".txt");
         this.subtitles = frameMapper.mapFramesToSubtitles();
 
     }

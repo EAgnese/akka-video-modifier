@@ -100,5 +100,10 @@
       <artifactId>logback-classic</artifactId>
       <version>1.2.9</version>
     </dependency>
+    <dependency>
+      <groupId>org.json</groupId>
+      <artifactId>json</artifactId>
+      <version>20230227</version>
+    </dependency>
   </dependencies>
 </project>
