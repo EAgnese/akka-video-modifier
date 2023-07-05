@@ -27,9 +27,7 @@ public class VideoFPSReader {
 
     public HashMap<String, Integer> getVideoFPS(String videosFilesPath, String jsonFilePath) {
         if (videoFPSMap.isEmpty()) {
-            if (!Files.exists(Paths.get(jsonFilePath))) {
-                runPythonScript(videosFilesPath, jsonFilePath);
-            }
+            runPythonScript(videosFilesPath, jsonFilePath);
             readJSONFile(jsonFilePath);
         }
 

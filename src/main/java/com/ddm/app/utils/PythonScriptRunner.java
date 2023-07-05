@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 public class PythonScriptRunner {
@@ -46,9 +47,9 @@ public class PythonScriptRunner {
 
             // Vérifier le code de sortie du processus
             if (exitCode == 0) {
-                result.add("Le script Python s'est terminé avec succès.");
+                result.add(Arrays.toString(cmd) + " end with success");
             }else {
-                result.add("Le script Python a rencontré une erreur.");
+                result.add("Error with python script : " + Arrays.toString(cmd));
             }
 
         } catch (IOException | InterruptedException e) {

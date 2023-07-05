@@ -12,4 +12,5 @@ public class Task {
     boolean cartoon;
     int videoId;
     String videoName;
+    String color;
 }
