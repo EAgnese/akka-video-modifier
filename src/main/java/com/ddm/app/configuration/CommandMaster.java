@@ -18,4 +18,8 @@ public class CommandMaster extends Command {
     @Parameter(names = {"-c", "--cartoon"}, description = "Enable the videos\' modification into a cartoon", arity = 0)
     boolean cartoon;
 
+    @Parameter(names = {"-o", "--one-color"}, description = "Enable the one color effect between [RED, GREEN, BLUE]", arity = 1)
+    String color = null;
+
+
 }

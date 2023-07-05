@@ -126,6 +126,18 @@ public class ModificationWorker extends AbstractBehavior<ModificationWorker.Mess
             }
         }
 
+        if (task.getColor() != null) {
+            String[] cmdOneColor = {
+                    pythoncommand, "python/one_color_effect.py",
+                    "-p", imgName,
+                    "-c", task.getColor()
+            };
+
+            for (String line : PythonScriptRunner.run(cmdOneColor)){
+                this.getContext().getLog().info(line);
+            }
+        }
+
         //Script for the subtitles
         String[] cmdSubtitles = {pythoncommand, "python/subtitles.py", "-p", imgName, "-s", task.getSubtitles()};
         //String[] cmd = {"pwd"};

@@ -20,7 +20,6 @@ def export_each_frame(video_path:str, export_path:str):
     while success:
         cv2.imwrite(f"{export_path}/{video_name}/{video_name}_frame{count}.jpg", image)     # save frame as PNG file
         success,image = vidcap.read()
-        print(f'Read frame {count}: ', success)
         count += 1
 
 def main():

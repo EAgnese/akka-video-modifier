@@ -6,6 +6,10 @@ import com.beust.jcommander.ParameterException;
 import com.ddm.app.singletons.InputConfigurationSingleton;
 import com.ddm.app.singletons.SystemConfigurationSingleton;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
 public abstract class Command {
 
     abstract int getDefaultPort();
@@ -40,6 +44,13 @@ public abstract class Command {
                 case SystemConfiguration.MASTER_ROLE:
                     SystemConfigurationSingleton.get().update(commandMaster);
                     InputConfigurationSingleton.get().update(commandMaster);
+                    String color = InputConfigurationSingleton.get().getColor();
+
+                    List<String> colors = new ArrayList<>(Arrays.asList("RED", "GREEN", "BLUE"));
+
+                    if(color != null && !colors.contains(color)) {
+                        throw new ParameterException("the color given '" +color+ "' is not in " + colors);
+                    }
                     break;
                 case SystemConfiguration.WORKER_ROLE:
                     SystemConfigurationSingleton.get().update(commandWorker);

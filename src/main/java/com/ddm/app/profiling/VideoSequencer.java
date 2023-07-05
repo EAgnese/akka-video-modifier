@@ -93,11 +93,13 @@ public class VideoSequencer extends AbstractBehavior<VideoSequencer.Message> {
     }
 
     public boolean cartoon;
+    public String color;
 
     private VideoSequencer(ActorContext<Message> context) {
         super(context);
         File[] inputFiles = InputConfigurationSingleton.get().getInputFiles();
         this.cartoon = InputConfigurationSingleton.get().isCartoon();
+        this.color = InputConfigurationSingleton.get().getColor();
 
         int size = inputFiles.length;
 
@@ -172,7 +174,7 @@ public class VideoSequencer extends AbstractBehavior<VideoSequencer.Message> {
 
         this.nbrImages.set(message.getId(), this.nbrImages.get(message.getId()) + 1)  ;
 
-        Task task = new Task(message.getImage(), message.getName(), message.getSubtitles(), this.cartoon, message.getId(), message.getVideoName());
+        Task task = new Task(message.getImage(), message.getName(), message.getSubtitles(), this.cartoon, message.getId(), message.getVideoName(), this.color);
 
         if (!this.idleWorkers.isEmpty()){
             ActorRef<ModificationWorker.Message> newModificationWorker = this.idleWorkers.remove();
@@ -251,7 +253,7 @@ public class VideoSequencer extends AbstractBehavior<VideoSequencer.Message> {
                     pythoncommand, "python/video_export.py",
                     "-f", resultFolder + "/images",
                     "-a", this.audioPaths.get(videoId),
-                    "-x", resultFolder + "/videos",
+                    "-x", "result/",
                     "-F", Integer.toString(videoFps)
             };
 
@@ -287,12 +289,15 @@ public class VideoSequencer extends AbstractBehavior<VideoSequencer.Message> {
 
     private void end() {
         this.resultCollector.tell(new ResultCollector.FinalizeMessage());
+        ContentDeleter.delete(new File("data/images"));
+        ContentDeleter.delete(new File("data/fps.json"));
 
-        File imagesDirectory = new File("data/images");
-        ContentDeleter.delete(imagesDirectory);
+        File resultDirectory = new File("result/");
 
-        for(String audiopath : this.audioPaths){
-            ContentDeleter.delete(new File(audiopath).getParentFile());
+        for(File content : Objects.requireNonNull(resultDirectory.listFiles())){
+            if(content.isDirectory()) {
+                ContentDeleter.delete(content);
+            }
         }
 
         long discoveryTime = System.currentTimeMillis() - this.startTime;
