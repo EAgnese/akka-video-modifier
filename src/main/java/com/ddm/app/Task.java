@@ -3,6 +3,8 @@ package com.ddm.app;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
+import java.util.List;
+
 @Getter
 @AllArgsConstructor
 public class Task {
@@ -12,5 +14,5 @@ public class Task {
     boolean cartoon;
     int videoId;
     String videoName;
-    String color;
+    List<String> colors;
 }

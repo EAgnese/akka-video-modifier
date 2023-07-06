@@ -22,6 +22,7 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.Arrays;
 import java.util.Set;
 
 public class ModificationWorker extends AbstractBehavior<ModificationWorker.Message> {
@@ -126,12 +127,18 @@ public class ModificationWorker extends AbstractBehavior<ModificationWorker.Mess
             }
         }
 
-        if (task.getColor() != null) {
-            String[] cmdOneColor = {
+        if (!task.getColors().isEmpty()) {
+            String[] cmdOneColorArray = {
                     pythoncommand, "python/one_color_effect.py",
                     "-p", imgName,
-                    "-c", task.getColor()
+                    "-c",
             };
+
+            String[] cmdOneColor = Arrays.copyOf(cmdOneColorArray, cmdOneColorArray.length + task.getColors().size());
+
+            for (int i = 0; i < task.getColors().size(); i++) {
+                cmdOneColor[cmdOneColorArray.length + i] = task.getColors().get(i);
+            }
 
             for (String line : PythonScriptRunner.run(cmdOneColor)){
                 this.getContext().getLog().info(line);

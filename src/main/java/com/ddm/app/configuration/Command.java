@@ -44,12 +44,17 @@ public abstract class Command {
                 case SystemConfiguration.MASTER_ROLE:
                     SystemConfigurationSingleton.get().update(commandMaster);
                     InputConfigurationSingleton.get().update(commandMaster);
-                    String color = InputConfigurationSingleton.get().getColor();
+                    List<String> colorsGiven = InputConfigurationSingleton.get().getColors();
 
-                    List<String> colors = new ArrayList<>(Arrays.asList("RED", "GREEN", "BLUE"));
+                    List<String> colors = new ArrayList<>(
+                            Arrays.asList("RED", "ORANGE", "YELLOW", "GREEN", "CYAN", "BLUE", "PURPLE", "PINK")
+                    );
 
-                    if(color != null && !colors.contains(color)) {
-                        throw new ParameterException("the color given '" +color+ "' is not in " + colors);
+                    List<String> difference = new ArrayList<>(colorsGiven);
+                    difference.removeAll(colors);
+
+                    if(!colorsGiven.isEmpty() && !difference.isEmpty()) {
+                        throw new ParameterException("the color(s) given " +difference+ " is not in " + colors);
                     }
                     break;
                 case SystemConfiguration.WORKER_ROLE:

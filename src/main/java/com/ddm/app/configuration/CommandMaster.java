@@ -4,6 +4,10 @@ import com.beust.jcommander.Parameter;
 import com.beust.jcommander.Parameters;
 import com.ddm.app.singletons.InputConfigurationSingleton;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
 
 @Parameters(commandDescription = "Start a master ActorSystem.")
 public class CommandMaster extends Command {
@@ -18,8 +22,8 @@ public class CommandMaster extends Command {
     @Parameter(names = {"-c", "--cartoon"}, description = "Enable the videos\' modification into a cartoon", arity = 0)
     boolean cartoon;
 
-    @Parameter(names = {"-o", "--one-color"}, description = "Enable the one color effect between [RED, GREEN, BLUE]", arity = 1)
-    String color = null;
+    @Parameter(names = {"-o", "--one-color"}, description = "Enable the one color effect between [RED, GREEN, BLUE]", variableArity=true)
+    List<String> colors = new ArrayList<>();
 
 
 }
