@@ -97,7 +97,7 @@ public class FXMLDocumentController implements Initializable {
         argsList.add("4");
 
         if (!directoryPath.getText().isEmpty()) {
-            argsList.add("ip");
+            argsList.add("-ip");
             argsList.add(directoryPath.getText());
         }
 
