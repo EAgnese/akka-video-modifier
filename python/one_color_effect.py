@@ -33,7 +33,7 @@ def main():
     parser = argparse.ArgumentParser(description="Python script to keep only one color and set in black and white other colors")
     parser.add_argument("-p", "--image-path", help="Target image file")
     parser.add_argument("-x", "--export-folder", help="Folder where the edited image will be exported, default is current directory", default=".")
-    parser.add_argument("-c", "--colors", help="Colors to keep", default="None", choices=Color.get_all_colors(), nargs="+")
+    parser.add_argument("-c", "--colors", help="Colors to keep", default="None", choices=Color.get_all_colors(), nargs="*")
     # parse the arguments
 
     args = parser.parse_args()
@@ -48,10 +48,10 @@ def main():
 
     image_export = os.path.join(export_folder, image_name)
 
-    if len(colors) > 0:
 
-        hsv = cv2.cvtColor(image, cv2.COLOR_BGR2HSV)
-        mask = cv2.inRange(hsv, np.array([0, 0, 0]),np.array([0, 0, 0]))
+    hsv = cv2.cvtColor(image, cv2.COLOR_BGR2HSV)
+    mask = cv2.inRange(hsv, np.array([0, 0, 0]),np.array([0, 0, 0]))
+    if len(colors) > 0:
         for color in colors:
             lower_color1, upper_color1, lower_color2, upper_color2 = color.value
             
@@ -62,7 +62,7 @@ def main():
                 mask += cv2.inRange(hsv, np.array(lower_color2), np.array(upper_color2))
         
 
-        image = apply_mask(image, mask)
+    image = apply_mask(image, mask)
 
     cv2.imwrite(image_export, image)
 
