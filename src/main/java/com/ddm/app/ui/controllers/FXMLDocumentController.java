@@ -1,6 +1,8 @@
 package com.ddm.app.ui.controllers;
 
 import com.ddm.app.App;
+import javafx.beans.property.BooleanProperty;
+import javafx.beans.property.SimpleBooleanProperty;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.geometry.Pos;
@@ -22,26 +24,30 @@ public class FXMLDocumentController implements Initializable {
 
     public static class ColorItem {
         private final String name;
-        private final CheckBox checkBox;
+        private final BooleanProperty selected;
 
         public ColorItem(String name) {
             this.name = name;
-            this.checkBox = new CheckBox();
+            this.selected = new SimpleBooleanProperty(false);
         }
         public String getName() {
-            return name;
+            return this.name;
         }
         public boolean isSelected() {
-            return checkBox.isSelected();
+            return this.selected.get();
+        }
+
+        public BooleanProperty getSelectedProperty(){
+            return this.selected;
         }
     }
 
+    private final BooleanProperty oneColorSelected = new SimpleBooleanProperty(false);
 
+    private List<ColorItem> colorItems;
 
     @FXML
     private ListView<ColorItem> colorList;
-
-    private List<ColorItem> colorItems;
 
     @FXML
     private TextField directoryPath;
@@ -64,7 +70,7 @@ public class FXMLDocumentController implements Initializable {
 
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
-        this.colorList.setVisible(this.rdButton2.isSelected());
+        this.colorList.visibleProperty().bind(oneColorSelected);
         this.colorItems = createColorItems();
 
         this.colorList.getItems().addAll(colorItems);
@@ -85,8 +91,29 @@ public class FXMLDocumentController implements Initializable {
 
     @FXML
     private void confirmPath(){
-        String[] args = {"master", "-w", "0",};
+        List<String> argsList = new ArrayList<>();
+        argsList.add("master");
+        argsList.add("-w");
+        argsList.add("4");
+
+        if (!directoryPath.getText().isEmpty()) {
+            argsList.add("ip");
+            argsList.add(directoryPath.getText());
+        }
+
+        if (this.rdButton2.isSelected()) {
+            argsList.add("-o");
+            for (String color : getSelectedColors()){
+                argsList.add(color.toUpperCase());
+            }
+        }
+
+        String[] args = argsList.toArray(new String[0]);
+//        for(String arg : args){
+//            System.out.println(arg);
+//        }
         App.main(args);
+
 
         Stage stage = (Stage) anchorId.getScene().getWindow();
         stage.close();
@@ -95,15 +122,19 @@ public class FXMLDocumentController implements Initializable {
     @FXML
     private void getVisualModification() {
 
-        if (this.rdButton1.isSelected()){
-            this.test.setText(this.rdButton1.getText());
-        } else if (this.rdButton2.isSelected()) {
-            this.test.setText(this.rdButton2.getText());
-        }else if (this.rdButton3.isSelected()) {
-            this.test.setText(this.rdButton3.getText());
+        String selectedText = "";
+        boolean oneColorSelected = this.rdButton2.isSelected();
+
+        if (this.rdButton1.isSelected()) {
+            selectedText = this.rdButton1.getText();
+        } else if (oneColorSelected) {
+            selectedText = this.rdButton2.getText();
+        } else if (this.rdButton3.isSelected()) {
+            selectedText = this.rdButton3.getText();
         }
 
-        this.colorList.setVisible(this.rdButton2.isSelected());
+        this.test.setText(selectedText);
+        this.oneColorSelected.set(oneColorSelected);
 
     }
 
@@ -121,14 +152,15 @@ public class FXMLDocumentController implements Initializable {
         return items;
     }
 
-    public List<ColorItem> getSelectedColors() {
-        List<ColorItem> selectedColors = new ArrayList<>();
+    public List<String> getSelectedColors() {
+        List<String> selectedColors = new ArrayList<>();
 
         for (ColorItem item : this.colorItems) {
             if (item.isSelected()) {
-                selectedColors.add(item);
+                selectedColors.add(item.getName());
             }
         }
+
 
         return selectedColors;
     }
@@ -143,6 +175,8 @@ public class FXMLDocumentController implements Initializable {
             this.content = new HBox();
             this.nameLabel = new Label();
             this.checkBox = new CheckBox();
+
+
 
             Region spacer = new Region();
             HBox.setHgrow(spacer, Priority.SOMETIMES);
@@ -162,7 +196,10 @@ public class FXMLDocumentController implements Initializable {
                 setGraphic(null);
             } else {
                 this.nameLabel.setText(item.getName());
-                this.checkBox.setSelected(item.isSelected());
+                //this.checkBox.setSelected(item.isSelected());
+
+                item.getSelectedProperty().bind(this.checkBox.selectedProperty());
+                //this.checkBox.selectedProperty().bind(item.getSelectedProperty());
 
                 setGraphic(this.content);
             }
