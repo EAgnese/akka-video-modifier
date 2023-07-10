@@ -43,32 +43,20 @@ def main():
     # load image
     img = cv2.imread(image_path)
     print(f"image {image_path} loaded")
-    # ==============
-    # TODO : delete
-    # width = 900
-    # img = cv2.resize(img, (width, int(img.shape[0]/int(img.shape[1])*width)))
-    # utils.show_image(img)
-    # ==============
-
+    
     line_size = 11
     blur_value = 9
     edges = edge_mask(img, line_size, blur_value)
-    print(f"edges calculated")
-    # TODO : delete
-    # utils.show_image(edges)
+    
 
     total_color = 31
     img = color_quantization(img, total_color)
-    print(f"color quantization done")
-    # TODO : delete
-    # utils.show_image(img)
+    
 
     blurred = cv2.bilateralFilter(img, d=15, sigmaColor=1,sigmaSpace=1)
 
     cartoon = cv2.bitwise_and(blurred, blurred, mask=edges)
-    print(f"final cartoon image done")
-    # TODO : delete
-    # utils.show_image(cartoon)
+
     os.remove(image_path)
     cv2.imwrite(export_folder+ "/" + img_name, cartoon)
 
