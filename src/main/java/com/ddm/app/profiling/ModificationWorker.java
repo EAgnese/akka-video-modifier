@@ -146,13 +146,15 @@ public class ModificationWorker extends AbstractBehavior<ModificationWorker.Mess
             }
         }
 
-        //Script for the subtitles
-        String[] cmdSubtitles = {pythoncommand, PythonScripts.SUBTITLES.label, "-p", imgName, "-s", task.getSubtitles()};
-        //String[] cmd = {"pwd"};
+        if(!task.getSubtitles().isEmpty()) {
+            String[] cmdSubtitles = {pythoncommand, PythonScripts.SUBTITLES.label, "-p", imgName, "-s", task.getSubtitles()};
+            //String[] cmd = {"pwd"};
 
-        for (String line : PythonScriptRunner.run(cmdSubtitles)){
-            this.getContext().getLog().info(line);
+            for (String line : PythonScriptRunner.run(cmdSubtitles)){
+                this.getContext().getLog().info(line);
+            }
         }
+        //Script for the subtitles
 
         Result result;
 
@@ -173,7 +175,7 @@ public class ModificationWorker extends AbstractBehavior<ModificationWorker.Mess
         File img = new File(imgName);
         if(!img.delete()){
             this.getContext().getLog().error("Unable to delete : " + imgName);
-        };
+        }
 
 
         return this;

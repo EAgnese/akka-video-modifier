@@ -87,8 +87,14 @@ public class InputReader extends AbstractBehavior<InputReader.Message> {
         HashMap<String, Integer> videoFPSMap = reader.getVideoFPS(inputFile.getParentFile().getPath(), "data/fps.json");
         int videoFps = videoFPSMap.get(this.videoName);
 
-        SubtitleFrameMapper frameMapper = new SubtitleFrameMapper(videoFps, "data/subtitles/"+ videoName +".txt");
-        this.subtitles = frameMapper.mapFramesToSubtitles();
+        File subtitlesFile = new File("data/subtitles/"+ videoName +".txt");
+        if(subtitlesFile.exists()) {
+            SubtitleFrameMapper frameMapper = new SubtitleFrameMapper(videoFps, subtitlesFile.getPath());
+            this.subtitles = frameMapper.mapFramesToSubtitles();
+        }
+        else {
+            this.subtitles = new HashMap<>();
+        }
 
     }
 
@@ -143,18 +149,18 @@ public class InputReader extends AbstractBehavior<InputReader.Message> {
 
     private int frameNumberExtraction(String fileName) {
 
-        // Définir le modèle de l'expression régulière
+        // Define the regular expression pattern
         String pattern = ".*?(\\d+)\\.jpg$";
 
-        // Créer un objet Pattern en compilant le modèle d'expression régulière
+        // Create a Pattern object by compiling the regular expression pattern
         Pattern regex = Pattern.compile(pattern);
 
-        // Créer un objet Matcher en utilisant le modèle et le nom de fichier
+        // Create a Matcher object using the pattern and the file name
         Matcher matcher = regex.matcher(fileName);
 
-        // Vérifier si le nom de fichier correspond au modèle
+        // Check if the file name matches the pattern
         if (matcher.matches()) {
-            // Extraire le numéro de frame à partir du groupe capturé
+            // Extract the frame number from the captured group
             String frameNumberStr = matcher.group(1);
 
             return Integer.parseInt(frameNumberStr);
