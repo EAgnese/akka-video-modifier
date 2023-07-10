@@ -1,4 +1,4 @@
-package com.ddm.app.utils;
+package com.ddm.app.businesslogic.utils;
 
 public enum PythonScripts {
     AUDIO_EXTRACTION("audio_extraction.py"),
