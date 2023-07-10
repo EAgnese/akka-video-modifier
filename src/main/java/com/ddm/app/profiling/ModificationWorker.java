@@ -13,6 +13,7 @@ import com.ddm.app.actors.patterns.LargeMessageProxy;
 import com.ddm.app.serialization.AkkaSerializable;
 import com.ddm.app.singletons.SystemConfigurationSingleton;
 import com.ddm.app.utils.PythonScriptRunner;
+import com.ddm.app.utils.PythonScripts;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -120,7 +121,7 @@ public class ModificationWorker extends AbstractBehavior<ModificationWorker.Mess
 
         //If the video has to be cartoonified, launch the cartoon script
         if (task.isCartoon()){
-            String[] cmdCartoon = {pythoncommand, "python/cartoon.py", "-p", imgName};
+            String[] cmdCartoon = {pythoncommand, PythonScripts.CARTOON.label, "-p", imgName};
 
             for (String line : PythonScriptRunner.run(cmdCartoon)){
                 this.getContext().getLog().info(line);
@@ -129,7 +130,7 @@ public class ModificationWorker extends AbstractBehavior<ModificationWorker.Mess
 
         if (!task.getColors().isEmpty()) {
             String[] cmdOneColorArray = {
-                    pythoncommand, "python/one_color_effect.py",
+                    pythoncommand, PythonScripts.BLACK_AND_WHITE_COLORED.label,
                     "-p", imgName,
                     "-c",
             };
@@ -146,7 +147,7 @@ public class ModificationWorker extends AbstractBehavior<ModificationWorker.Mess
         }
 
         //Script for the subtitles
-        String[] cmdSubtitles = {pythoncommand, "python/subtitles.py", "-p", imgName, "-s", task.getSubtitles()};
+        String[] cmdSubtitles = {pythoncommand, PythonScripts.SUBTITLES.label, "-p", imgName, "-s", task.getSubtitles()};
         //String[] cmd = {"pwd"};
 
         for (String line : PythonScriptRunner.run(cmdSubtitles)){

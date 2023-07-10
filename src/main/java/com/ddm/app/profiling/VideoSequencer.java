@@ -17,6 +17,7 @@ import com.ddm.app.singletons.InputConfigurationSingleton;
 import com.ddm.app.singletons.SystemConfigurationSingleton;
 import com.ddm.app.utils.ContentDeleter;
 import com.ddm.app.utils.PythonScriptRunner;
+import com.ddm.app.utils.PythonScripts;
 import com.ddm.app.utils.VideoFPSReader;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -250,7 +251,7 @@ public class VideoSequencer extends AbstractBehavior<VideoSequencer.Message> {
             int videoFps = videoFPSMap.get(videoName);
 
             String[] cmdExport = {
-                    pythoncommand, "python/video_export.py",
+                    pythoncommand, PythonScripts.VIDEO_EXPORT.label,
                     "-f", resultFolder + "/images",
                     "-a", this.audioPaths.get(videoId),
                     "-x", "result/",

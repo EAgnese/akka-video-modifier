@@ -36,7 +36,7 @@ public class VideoFPSReader {
 
     private void runPythonScript(String videosFilesPath, String jsonFilePath) {
         String pythoncommand = SystemConfigurationSingleton.get().getPythoncommand();
-        String[] cmdFps = {pythoncommand, "python/videos_fps.py", "-p", videosFilesPath, "-o", jsonFilePath};
+        String[] cmdFps = {pythoncommand, PythonScripts.VIDEOS_FPS.label, "-p", videosFilesPath, "-o", jsonFilePath};
         PythonScriptRunner.run(cmdFps);
     }
 
