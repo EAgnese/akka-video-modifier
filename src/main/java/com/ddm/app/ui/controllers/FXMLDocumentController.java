@@ -101,6 +101,10 @@ public class FXMLDocumentController implements Initializable {
             argsList.add(directoryPath.getText());
         }
 
+        if (this.rdButton1.isSelected()){
+            argsList.add("-c");
+        }
+
         if (this.rdButton2.isSelected()) {
             argsList.add("-o");
             for (String color : getSelectedColors()){
@@ -126,11 +130,11 @@ public class FXMLDocumentController implements Initializable {
         boolean oneColorSelected = this.rdButton2.isSelected();
 
         if (this.rdButton1.isSelected()) {
-            selectedText = this.rdButton1.getText();
+            selectedText = "Give a cartoon effect to your video(s)";
         } else if (oneColorSelected) {
-            selectedText = this.rdButton2.getText();
+            selectedText = "Erase all colors of your video(s), except the one you select below";
         } else if (this.rdButton3.isSelected()) {
-            selectedText = this.rdButton3.getText();
+            selectedText = "No visual modification";
         }
 
         this.test.setText(selectedText);
@@ -196,10 +200,8 @@ public class FXMLDocumentController implements Initializable {
                 setGraphic(null);
             } else {
                 this.nameLabel.setText(item.getName());
-                //this.checkBox.setSelected(item.isSelected());
 
                 item.getSelectedProperty().bind(this.checkBox.selectedProperty());
-                //this.checkBox.selectedProperty().bind(item.getSelectedProperty());
 
                 setGraphic(this.content);
             }
