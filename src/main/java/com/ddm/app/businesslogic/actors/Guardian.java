@@ -1,14 +1,14 @@
-package com.ddm.app.actors;
+package com.ddm.app.businesslogic.actors;
 
 import akka.actor.typed.ActorRef;
 import akka.actor.typed.Behavior;
 import akka.actor.typed.javadsl.*;
 import akka.actor.typed.receptionist.Receptionist;
 import akka.actor.typed.receptionist.ServiceKey;
-import com.ddm.app.actors.patterns.Reaper;
-import com.ddm.app.configuration.SystemConfiguration;
-import com.ddm.app.serialization.AkkaSerializable;
-import com.ddm.app.singletons.SystemConfigurationSingleton;
+import com.ddm.app.businesslogic.actors.patterns.Reaper;
+import com.ddm.app.businesslogic.configuration.SystemConfiguration;
+import com.ddm.app.businesslogic.serialization.AkkaSerializable;
+import com.ddm.app.businesslogic.singletons.SystemConfigurationSingleton;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;

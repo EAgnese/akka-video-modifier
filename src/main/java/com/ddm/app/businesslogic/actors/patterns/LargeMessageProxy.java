@@ -1,4 +1,4 @@
-package com.ddm.app.actors.patterns;
+package com.ddm.app.businesslogic.actors.patterns;
 
 import akka.actor.typed.ActorRef;
 import akka.actor.typed.Behavior;
@@ -9,7 +9,7 @@ import akka.actor.typed.javadsl.Receive;
 import akka.serialization.Serialization;
 import akka.serialization.SerializationExtension;
 import akka.serialization.Serializers;
-import com.ddm.app.serialization.AkkaSerializable;
+import com.ddm.app.businesslogic.serialization.AkkaSerializable;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.Getter;

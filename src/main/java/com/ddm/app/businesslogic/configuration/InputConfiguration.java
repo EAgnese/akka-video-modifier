@@ -1,4 +1,4 @@
-package com.ddm.app.configuration;
+package com.ddm.app.businesslogic.configuration;
 
 
 import lombok.Data;

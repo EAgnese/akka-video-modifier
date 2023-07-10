@@ -1,10 +1,10 @@
-package com.ddm.app.configuration;
+package com.ddm.app.businesslogic.configuration;
 
 import com.beust.jcommander.JCommander;
 import com.beust.jcommander.Parameter;
 import com.beust.jcommander.ParameterException;
-import com.ddm.app.singletons.InputConfigurationSingleton;
-import com.ddm.app.singletons.SystemConfigurationSingleton;
+import com.ddm.app.businesslogic.singletons.InputConfigurationSingleton;
+import com.ddm.app.businesslogic.singletons.SystemConfigurationSingleton;
 
 import java.util.ArrayList;
 import java.util.Arrays;

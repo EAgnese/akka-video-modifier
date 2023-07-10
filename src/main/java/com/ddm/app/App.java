@@ -1,10 +1,10 @@
 package com.ddm.app;
 
 import akka.actor.typed.ActorSystem;
-import com.ddm.app.actors.Guardian;
-import com.ddm.app.configuration.Command;
-import com.ddm.app.configuration.SystemConfiguration;
-import com.ddm.app.singletons.SystemConfigurationSingleton;
+import com.ddm.app.businesslogic.actors.Guardian;
+import com.ddm.app.businesslogic.configuration.Command;
+import com.ddm.app.businesslogic.configuration.SystemConfiguration;
+import com.ddm.app.businesslogic.singletons.SystemConfigurationSingleton;
 
 public class App 
 {

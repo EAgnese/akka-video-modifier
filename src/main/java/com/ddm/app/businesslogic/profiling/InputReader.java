@@ -1,4 +1,4 @@
-package com.ddm.app.profiling;
+package com.ddm.app.businesslogic.profiling;
 
 import akka.actor.typed.ActorRef;
 import akka.actor.typed.Behavior;
@@ -7,12 +7,12 @@ import akka.actor.typed.javadsl.AbstractBehavior;
 import akka.actor.typed.javadsl.ActorContext;
 import akka.actor.typed.javadsl.Behaviors;
 import akka.actor.typed.javadsl.Receive;
-import com.ddm.app.serialization.AkkaSerializable;
-import com.ddm.app.singletons.SystemConfigurationSingleton;
-import com.ddm.app.utils.PythonScriptRunner;
-import com.ddm.app.utils.PythonScripts;
-import com.ddm.app.utils.SubtitleFrameMapper;
-import com.ddm.app.utils.VideoFPSReader;
+import com.ddm.app.businesslogic.singletons.SystemConfigurationSingleton;
+import com.ddm.app.businesslogic.serialization.AkkaSerializable;
+import com.ddm.app.businesslogic.utils.PythonScriptRunner;
+import com.ddm.app.businesslogic.utils.PythonScripts;
+import com.ddm.app.businesslogic.utils.SubtitleFrameMapper;
+import com.ddm.app.businesslogic.utils.VideoFPSReader;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;

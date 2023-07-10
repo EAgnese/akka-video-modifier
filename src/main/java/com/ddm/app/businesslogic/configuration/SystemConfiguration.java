@@ -1,4 +1,4 @@
-package com.ddm.app.configuration;
+package com.ddm.app.businesslogic.configuration;
 
 import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;

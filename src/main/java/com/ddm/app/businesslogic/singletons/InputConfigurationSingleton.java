@@ -1,6 +1,6 @@
-package com.ddm.app.singletons;
+package com.ddm.app.businesslogic.singletons;
 
-import com.ddm.app.configuration.InputConfiguration;
+import com.ddm.app.businesslogic.configuration.InputConfiguration;
 
 public class InputConfigurationSingleton {
 

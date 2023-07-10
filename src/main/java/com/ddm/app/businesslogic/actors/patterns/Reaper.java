@@ -1,4 +1,4 @@
-package com.ddm.app.actors.patterns;
+package com.ddm.app.businesslogic.actors.patterns;
 
 import akka.actor.typed.ActorRef;
 import akka.actor.typed.Behavior;
@@ -7,8 +7,8 @@ import akka.actor.typed.javadsl.AbstractBehavior;
 import akka.actor.typed.javadsl.ActorContext;
 import akka.actor.typed.javadsl.Behaviors;
 import akka.actor.typed.javadsl.Receive;
-import com.ddm.app.serialization.AkkaSerializable;
-import com.ddm.app.singletons.ReaperSingleton;
+import com.ddm.app.businesslogic.serialization.AkkaSerializable;
+import com.ddm.app.businesslogic.singletons.ReaperSingleton;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;

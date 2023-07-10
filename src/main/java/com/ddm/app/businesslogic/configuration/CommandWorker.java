@@ -1,8 +1,8 @@
-package com.ddm.app.configuration;
+package com.ddm.app.businesslogic.configuration;
 
 import com.beust.jcommander.Parameter;
 import com.beust.jcommander.Parameters;
-import com.ddm.app.singletons.SystemConfigurationSingleton;
+import com.ddm.app.businesslogic.singletons.SystemConfigurationSingleton;
 
 @Parameters(commandDescription = "Start a worker ActorSystem.")
 public class CommandWorker extends Command {

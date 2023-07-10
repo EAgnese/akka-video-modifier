@@ -1,4 +1,4 @@
-package com.ddm.app.serialization;
+package com.ddm.app.businesslogic.serialization;
 
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;

@@ -1,4 +1,4 @@
-package com.ddm.app.actors;
+package com.ddm.app.businesslogic.actors;
 
 import akka.actor.typed.ActorRef;
 import akka.actor.typed.Behavior;
@@ -7,23 +7,22 @@ import akka.actor.typed.javadsl.AbstractBehavior;
 import akka.actor.typed.javadsl.ActorContext;
 import akka.actor.typed.javadsl.Behaviors;
 import akka.actor.typed.javadsl.Receive;
-import com.ddm.app.actors.patterns.Reaper;
-import com.ddm.app.profiling.VideoSequencer;
-import com.ddm.app.serialization.AkkaSerializable;
+import com.ddm.app.businesslogic.actors.patterns.Reaper;
+import com.ddm.app.businesslogic.profiling.ModificationWorker;
+import com.ddm.app.businesslogic.serialization.AkkaSerializable;
+import com.ddm.app.businesslogic.singletons.SystemConfigurationSingleton;
 import lombok.NoArgsConstructor;
 
-public class Master extends AbstractBehavior<Master.Message> {
+import java.util.ArrayList;
+import java.util.List;
+
+public class Worker extends AbstractBehavior<Worker.Message> {
 
     ////////////////////
     // Actor Messages //
     ////////////////////
 
     public interface Message extends AkkaSerializable {
-    }
-
-    @NoArgsConstructor
-    public static class StartMessage implements Message {
-        private static final long serialVersionUID = -1963913294517850454L;
     }
 
     @NoArgsConstructor
@@ -35,24 +34,29 @@ public class Master extends AbstractBehavior<Master.Message> {
     // Actor Construction //
     ////////////////////////
 
-    public static final String DEFAULT_NAME = "master";
+    public static final String DEFAULT_NAME = "worker";
 
     public static Behavior<Message> create() {
-        return Behaviors.setup(Master::new);
+        return Behaviors.setup(Worker::new);
     }
 
-    private Master(ActorContext<Message> context) {
+    private Worker(ActorContext<Message> context) {
         super(context);
         Reaper.watchWithDefaultReaper(this.getContext().getSelf());
 
-        this.videoSequencer = context.spawn(VideoSequencer.create(), VideoSequencer.DEFAULT_NAME, DispatcherSelector.fromConfig("akka.master-pinned-dispatcher"));
+        final int numWorkers = SystemConfigurationSingleton.get().getNumWorkers();
+
+        this.workers = new ArrayList<>(numWorkers);
+        for (int id = 0; id < numWorkers; id++)
+            this.workers.add(context.spawn(ModificationWorker.create(), ModificationWorker.DEFAULT_NAME + "_" + id, DispatcherSelector.fromConfig("akka.worker-pool-dispatcher")));
+
     }
 
     /////////////////
     // Actor State //
     /////////////////
 
-    private final ActorRef<VideoSequencer.Message> videoSequencer;
+    final List<ActorRef<ModificationWorker.Message>> workers;
 
     ////////////////////
     // Actor Behavior //
@@ -61,14 +65,8 @@ public class Master extends AbstractBehavior<Master.Message> {
     @Override
     public Receive<Message> createReceive() {
         return newReceiveBuilder()
-                .onMessage(StartMessage.class, this::handle)
                 .onMessage(ShutdownMessage.class, this::handle)
                 .build();
-    }
-
-    private Behavior<Message> handle(StartMessage message) {
-        this.videoSequencer.tell(new VideoSequencer.StartMessage());
-        return this;
     }
 
     private Behavior<Message> handle(ShutdownMessage message) {
@@ -76,6 +74,10 @@ public class Master extends AbstractBehavior<Master.Message> {
         // we should propagate this ShutdownMessage to all active child actors so that they
         // can end their protocols in a clean way. Simply stopping this actor also stops all
         // child actors, but in a hard way!
+        for(ActorRef<ModificationWorker.Message> worker : this.workers){
+            worker.tell(new ModificationWorker.ShutdownMessage());
+        }
+
         return Behaviors.stopped();
     }
 }

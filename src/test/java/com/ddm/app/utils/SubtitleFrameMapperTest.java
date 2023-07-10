@@ -1,5 +1,6 @@
 package com.ddm.app.utils;
 
+import com.ddm.app.businesslogic.utils.SubtitleFrameMapper;
 import org.junit.Assert;
 import org.junit.Test;
 

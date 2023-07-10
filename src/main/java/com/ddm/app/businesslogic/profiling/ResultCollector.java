@@ -1,4 +1,4 @@
-package com.ddm.app.profiling;
+package com.ddm.app.businesslogic.profiling;
 
 import akka.actor.typed.Behavior;
 import akka.actor.typed.PostStop;
@@ -6,8 +6,8 @@ import akka.actor.typed.javadsl.AbstractBehavior;
 import akka.actor.typed.javadsl.ActorContext;
 import akka.actor.typed.javadsl.Behaviors;
 import akka.actor.typed.javadsl.Receive;
-import com.ddm.app.actors.Guardian;
-import com.ddm.app.serialization.AkkaSerializable;
+import com.ddm.app.businesslogic.actors.Guardian;
+import com.ddm.app.businesslogic.serialization.AkkaSerializable;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;

@@ -1,4 +1,4 @@
-package com.ddm.app.utils;
+package com.ddm.app.businesslogic.utils;
 
 import java.io.File;
 

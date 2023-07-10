@@ -1,7 +1,7 @@
-package com.ddm.app.singletons;
+package com.ddm.app.businesslogic.singletons;
 
 import akka.actor.typed.ActorRef;
-import com.ddm.app.actors.patterns.Reaper;
+import com.ddm.app.businesslogic.actors.patterns.Reaper;
 
 public class ReaperSingleton {
 

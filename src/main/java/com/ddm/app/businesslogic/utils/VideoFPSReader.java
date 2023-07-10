@@ -1,6 +1,6 @@
-package com.ddm.app.utils;
+package com.ddm.app.businesslogic.utils;
 
-import com.ddm.app.singletons.SystemConfigurationSingleton;
+import com.ddm.app.businesslogic.singletons.SystemConfigurationSingleton;
 import org.json.JSONException;
 import org.json.JSONObject;
 
