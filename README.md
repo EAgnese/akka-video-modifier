@@ -192,7 +192,7 @@ options:
                         Folder where the edited image will be exported, default is current directory
 ```
 
-## <font color="blue"> one_color_effect.py </font>
+## <font color="blue"> no_color_except.py </font>
 ```
 Python script to keep from an image some colors and set in black and white other colors
 
