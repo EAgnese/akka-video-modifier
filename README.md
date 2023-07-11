@@ -13,8 +13,19 @@ A worker can be launched on the same machine as the master, or on another one.
 Multiple workers can be launched on multiple machines, all connected to the master.
 This makes it possible to parallelize tasks and increase the execution speed based on the number of machines.
 
-For example, we tested this on a 12 raspberry pi cluster (~420 €) and it was X times faster than a 600€ computer.
+For example, we tested this on a 12 raspberry pi cluster (~420 €) to compare with a 600€ computer.
 
+tests : add subtitles to a 10 seconds video and removes all colors except yellow
+```
+PC with 4 workers : 74 seconds
+PC with 8 workers : 61 seconds
+PC with 48 workers : 52 seconds
+Cluster 12 raspberry pi 4 : 48 workers + 4 workers on PC : 40 seconds
+Cluster 12 raspberry pi 4 : 96 workers + 4 workers on PC : 40 seconds
+
+PC CPU specs : Intel® Core™ i5-9300H CPU @ 2.40GHz × 8 
+Pi specs : Raspberry Pi 4 Model B Rev 1.1
+```
 
 # <font color="blue"> How to use it</font>
 
@@ -179,4 +190,19 @@ options:
                         Target image file
   -x EXPORT_FOLDER, --export-folder EXPORT_FOLDER
                         Folder where the edited image will be exported, default is current directory
+```
+
+## <font color="blue"> one_color_effect.py </font>
+```
+Python script to keep from an image some colors and set in black and white other colors
+
+options:
+  -h, --help            show this help message and exit
+  -p IMAGE_PATH, --image-path IMAGE_PATH
+                        Target image file
+  -x EXPORT_FOLDER, --export-folder EXPORT_FOLDER
+                        Folder where the edited image will be exported,
+                        default is current directory
+  -c [{RED,GREEN,BLUE,YELLOW,ORANGE,PINK,PURPLE,CYAN} ...], --colors [{RED,GREEN,BLUE,YELLOW,ORANGE,PINK,PURPLE,CYAN} ...]
+                        Colors to keep
 ```
