@@ -71,19 +71,4 @@ public class SubtitleFrameMapper {
 
         return (int) (totalSeconds * fps + frame);
     }
-
-    public static void main(String[] args) {
-        int fps = 24;
-        int duration = 3*24+18;
-        String filePath = "subtitles.txt";
-
-        SubtitleFrameMapper frameMapper = new SubtitleFrameMapper(fps, filePath);
-        Map<Integer, String> frameSubtitleMap = frameMapper.mapFramesToSubtitles();
-
-        for (int frameNumber = 0;frameNumber <= duration;frameNumber++) {
-            String subtitle = frameSubtitleMap.get(frameNumber);
-
-            System.out.println("Frame " + frameNumber + ": " + ((subtitle == null) ? "":subtitle));
-        }
-    }
 }
