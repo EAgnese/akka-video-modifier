@@ -23,9 +23,10 @@ import java.util.ResourceBundle;
 public class FXMLDocumentController implements Initializable {
 
     public static class ColorItem {
+
+
         private final String name;
         private final BooleanProperty selected;
-
         public ColorItem(String name) {
             this.name = name;
             this.selected = new SimpleBooleanProperty(false);
@@ -33,13 +34,14 @@ public class FXMLDocumentController implements Initializable {
         public String getName() {
             return this.name;
         }
+
         public boolean isSelected() {
             return this.selected.get();
         }
-
         public BooleanProperty getSelectedProperty(){
             return this.selected;
         }
+
     }
 
     private final BooleanProperty oneColorSelected = new SimpleBooleanProperty(false);
@@ -49,6 +51,10 @@ public class FXMLDocumentController implements Initializable {
     @FXML
     private ListView<ColorItem> colorList;
 
+    @FXML
+    private TextField ip;
+    @FXML
+    private TextField port;
     @FXML
     private TextField directoryPath;
 
@@ -73,6 +79,8 @@ public class FXMLDocumentController implements Initializable {
         this.colorList.visibleProperty().bind(oneColorSelected);
         this.colorItems = createColorItems();
 
+        this.rdButton3.selectedProperty().set(true);
+
         this.colorList.getItems().addAll(colorItems);
         colorList.setCellFactory(listView -> new ColorItemCell());
     }
@@ -96,9 +104,19 @@ public class FXMLDocumentController implements Initializable {
         argsList.add("-w");
         argsList.add("4");
 
-        if (!directoryPath.getText().isEmpty()) {
+        if (!this.ip.getText().isEmpty()) {
+            argsList.add("-h");
+            argsList.add(this.ip.getText());
+        }
+
+        if (!this.port.getText().isEmpty()) {
+            argsList.add("-p");
+            argsList.add(this.port.getText());
+        }
+
+        if (!this.directoryPath.getText().isEmpty()) {
             argsList.add("-ip");
-            argsList.add(directoryPath.getText());
+            argsList.add(this.directoryPath.getText());
         }
 
         if (this.rdButton1.isSelected()){

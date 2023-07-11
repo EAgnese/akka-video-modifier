@@ -10,30 +10,28 @@
 <?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.text.Font?>
 
-
-<StackPane xmlns="http://javafx.com/javafx/20.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.ddm.app.ui.controllers.FXMLDocumentController"
-           minHeight="446.0" minWidth="618.0" >
-   <children>
-      <AnchorPane fx:id="anchorId" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="446.0" minWidth="618.0" prefHeight="446.0" prefWidth="618.0">
-         <children>
-            <Button layoutX="500.0" layoutY="72.0" mnemonicParsing="false" onAction="#handleButtonAction" text="Browse" />
-            <TextField fx:id="directoryPath" layoutX="43.0" layoutY="72.0" prefHeight="24.0" prefWidth="420.0" />
-            <Label layoutX="42.0" layoutY="56.0" text="Choose the directory of Videos" />
-            <Button layoutX="276.0" layoutY="124.0" mnemonicParsing="false" onAction="#confirmPath" text="Confirm" />
-            <RadioButton fx:id="rdButton1" layoutX="84.0" layoutY="242.0" mnemonicParsing="false" onAction="#getVisualModification" text="Cartoon">
-               <toggleGroup>
-                  <ToggleGroup fx:id="visualModifications" />
-               </toggleGroup>
-            </RadioButton>
-            <RadioButton fx:id="rdButton2" layoutX="262.0" layoutY="242.0" mnemonicParsing="false" onAction="#getVisualModification" text="One Color" toggleGroup="$visualModifications" />
-            <Label fx:id="test" alignment="CENTER" layoutY="191.0" prefHeight="16.0" prefWidth="618.0" text="Label">
-               <font>
-                  <Font size="26.0" />
-               </font>
-            </Label>
-            <RadioButton fx:id="rdButton3" layoutX="445.0" layoutY="242.0" mnemonicParsing="false" onAction="#getVisualModification" text="None" toggleGroup="$visualModifications" />
-            <ListView fx:id="colorList" layoutX="211.0" layoutY="282.0" prefHeight="130.0" prefWidth="200.0" />
-         </children>
-      </AnchorPane>
-   </children>
+<StackPane minHeight="446.0" minWidth="618.0" xmlns="http://javafx.com/javafx/20.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.ddm.app.ui.controllers.FXMLDocumentController">
+   <AnchorPane fx:id="anchorId" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="446.0" minWidth="618.0" prefHeight="552.0" prefWidth="618.0">
+      <Button layoutX="500.0" layoutY="169.0" mnemonicParsing="false" onAction="#handleButtonAction" text="Browse" />
+      <TextField fx:id="directoryPath" layoutX="43.0" layoutY="169.0" prefHeight="24.0" prefWidth="420.0" promptText="Default : .../akka-video-modifier/data/videos" />
+      <Label layoutX="42.0" layoutY="153.0" text="Choose the directory of Videos" />
+      <Button layoutX="275.0" layoutY="514.0" mnemonicParsing="false" onAction="#confirmPath" text="Confirm" />
+      <RadioButton fx:id="rdButton1" layoutX="84.0" layoutY="305.0" mnemonicParsing="false" onAction="#getVisualModification" text="Cartoon">
+         <toggleGroup>
+            <ToggleGroup fx:id="visualModifications" />
+         </toggleGroup>
+      </RadioButton>
+      <RadioButton fx:id="rdButton2" layoutX="262.0" layoutY="305.0" mnemonicParsing="false" onAction="#getVisualModification" text="One Color" toggleGroup="$visualModifications" />
+      <Label fx:id="test" alignment="CENTER" layoutX="39.0" layoutY="234.0" prefHeight="59.0" prefWidth="541.0" text="Label">
+         <font>
+            <Font size="17.0" />
+         </font>
+      </Label>
+      <RadioButton fx:id="rdButton3" layoutX="445.0" layoutY="305.0" mnemonicParsing="false" onAction="#getVisualModification" text="None" toggleGroup="$visualModifications" />
+      <ListView fx:id="colorList" layoutX="189.0" layoutY="345.0" prefHeight="150.0" prefWidth="237.0" />
+      <TextField fx:id="ip" layoutX="43.0" layoutY="93.0" prefHeight="24.0" prefWidth="237.0" promptText="Default : 10.42.0.1" />
+      <TextField fx:id="port" layoutX="345.0" layoutY="93.0" prefHeight="24.0" prefWidth="237.0" promptText="Default : 7877" />
+      <Label layoutX="42.0" layoutY="71.0" text="Host's ip" />
+      <Label layoutX="345.0" layoutY="71.0" text="Port" />
+   </AnchorPane>
 </StackPane>
