@@ -11,7 +11,7 @@ import java.util.Objects;
 public class MainFrame extends Application {
     @Override
     public void start(Stage stage) throws Exception {
-        Parent root = FXMLLoader.load(Objects.requireNonNull(getClass().getResource("/frames/videos-selector.fxml")));
+        Parent root = FXMLLoader.load(Objects.requireNonNull(getClass().getResource("/frames/parameters-frames.fxml")));
         stage.setTitle("Akka Video Modifier");
         stage.setScene(new Scene(root));
         stage.show();

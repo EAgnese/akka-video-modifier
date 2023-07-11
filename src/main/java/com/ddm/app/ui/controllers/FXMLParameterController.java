@@ -20,7 +20,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.ResourceBundle;
 
-public class FXMLDocumentController implements Initializable {
+public class FXMLParameterController implements Initializable {
 
     public static class ColorItem {
 
