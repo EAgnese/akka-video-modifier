@@ -14,7 +14,7 @@ public class JFXParametersChooser extends Application {
         stage.setTitle("Akka Video Modifier");
 
         stage.setMinWidth(575);
-        stage.setMinHeight(550);
+        stage.setMinHeight(575);
 
         stage.setScene(new Scene(root));
         stage.show();

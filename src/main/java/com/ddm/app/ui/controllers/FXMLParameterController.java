@@ -4,8 +4,10 @@ import com.ddm.app.App;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
 import javafx.geometry.Pos;
+import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.HBox;
@@ -15,6 +17,7 @@ import javafx.stage.DirectoryChooser;
 import javafx.stage.Stage;
 
 import java.io.File;
+import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
@@ -137,8 +140,26 @@ public class FXMLParameterController implements Initializable {
         App.main(args);
 
 
-        Stage stage = (Stage) anchorId.getScene().getWindow();
-        stage.close();
+        try {
+            FXMLLoader loader = new FXMLLoader(
+                    getClass().getResource(
+                            "/frames/modifications-progress.fxml"
+                    )
+            );
+
+            Stage newStage = new Stage();
+            newStage.setTitle("progress");
+
+            newStage.setScene(new Scene(loader.load()));
+            newStage.show();
+
+            Stage stage = (Stage) anchorId.getScene().getWindow();
+            stage.close();
+
+        }catch (IOException e){
+            e.printStackTrace();
+        }
+
     }
 
     @FXML
