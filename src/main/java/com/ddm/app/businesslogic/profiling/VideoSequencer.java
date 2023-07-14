@@ -15,10 +15,9 @@ import com.ddm.app.businesslogic.actors.patterns.LargeMessageProxy;
 import com.ddm.app.businesslogic.singletons.InputConfigurationSingleton;
 import com.ddm.app.businesslogic.singletons.SystemConfigurationSingleton;
 import com.ddm.app.businesslogic.serialization.AkkaSerializable;
-import com.ddm.app.businesslogic.utils.ContentDeleter;
-import com.ddm.app.businesslogic.utils.PythonScriptRunner;
-import com.ddm.app.businesslogic.utils.PythonScripts;
-import com.ddm.app.businesslogic.utils.VideoFPSReader;
+import com.ddm.app.businesslogic.utils.*;
+import com.ddm.app.ui.controllers.FXMLProgressController;
+import com.ddm.app.ui.interfaces.ProgressInterface;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -93,9 +92,6 @@ public class VideoSequencer extends AbstractBehavior<VideoSequencer.Message> {
         return Behaviors.setup(VideoSequencer::new);
     }
 
-    public boolean cartoon;
-    public List<String> colors;
-
     private VideoSequencer(ActorContext<Message> context) {
         super(context);
         File[] inputFiles = InputConfigurationSingleton.get().getInputFiles();
@@ -108,6 +104,7 @@ public class VideoSequencer extends AbstractBehavior<VideoSequencer.Message> {
         this.modifiedImages = new ArrayList<>(size);
         this.inputReaders = new ArrayList<>(size);
         this.audioPaths = new ArrayList<>(size);
+        this.progress.init(size);
 
         for (int id = 0; id < inputFiles.length; id++){
             this.inputReaders.add(context.spawn(InputReader.create(id, inputFiles[id]), InputReader.DEFAULT_NAME + "_" + id));
@@ -128,20 +125,26 @@ public class VideoSequencer extends AbstractBehavior<VideoSequencer.Message> {
 
     private long startTime;
 
-    private final List<String> audioPaths;
+    // Actors attributes
     private final List<ActorRef<InputReader.Message>> inputReaders;
     private final List<ActorRef<ModificationWorker.Message>> modificationWorkers;
     private final ActorRef<ResultCollector.Message> resultCollector;
     private final ActorRef<LargeMessageProxy.Message> largeMessageProxy;
 
-    private final ArrayList<Integer> nbrImages;
-
-    private final ArrayList<Integer> modifiedImages;
-
+    // Master/Worker pattern attributes
+    private final Map<ActorRef<ModificationWorker.Message>, Task> busyWorkers = new HashMap<>();
     private final Queue<Task> unassignedTasks = new LinkedList<>();
     private final Queue<ActorRef<ModificationWorker.Message>> idleWorkers = new LinkedList<>();
-    private final Map<ActorRef<ModificationWorker.Message>, Task> busyWorkers = new HashMap<>();
 
+    // other attributes
+    public boolean cartoon;
+    public List<String> colors;
+    private final List<String> audioPaths;
+    private final ArrayList<Integer> nbrImages;
+    private final ArrayList<Integer> modifiedImages;
+
+    // ui
+    private final ProgressInterface progress = new FXMLProgressController();
 
     ////////////////////
     // Actor Behavior //
@@ -175,14 +178,15 @@ public class VideoSequencer extends AbstractBehavior<VideoSequencer.Message> {
 
         this.nbrImages.set(message.getId(), this.nbrImages.get(message.getId()) + 1)  ;
 
+        //Create new Task for the workers
         Task task = new Task(message.getImage(), message.getName(), message.getSubtitles(), this.cartoon, message.getId(), message.getVideoName(), this.colors);
 
+        //Assign task to an idle workers or put it in unassigned tasks if all the workers are busy
         if (!this.idleWorkers.isEmpty()){
             ActorRef<ModificationWorker.Message> newModificationWorker = this.idleWorkers.remove();
             this.busyWorkers.put(newModificationWorker, task);
             newModificationWorker.tell(new ModificationWorker.TaskMessage(this.largeMessageProxy, task));
         }else {
-
             this.unassignedTasks.add(task);
         }
 
@@ -237,6 +241,7 @@ public class VideoSequencer extends AbstractBehavior<VideoSequencer.Message> {
         }
 
         this.modifiedImages.set(videoId, this.modifiedImages.get(videoId) + 1);
+        this.progress.updateProgress(videoId,this.modifiedImages.get(videoId));
 
         if (Objects.equals(this.modifiedImages.get(videoId), this.nbrImages.get(videoId))) {
 
