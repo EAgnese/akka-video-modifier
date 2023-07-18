@@ -1,5 +1,6 @@
 package com.ddm.app.businesslogic.configuration;
 
+import com.ddm.app.businesslogic.utils.ConfigMaster;
 import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;
 import lombok.Data;
@@ -40,15 +41,16 @@ public class SystemConfiguration {
         }
     }
 
-    public void update(CommandMaster commandMaster) {
+    public void update(ConfigMaster guiMaster) {
         this.role = MASTER_ROLE;
-        this.host = commandMaster.host;
-        this.port = commandMaster.port;
-        this.masterHost = commandMaster.host;
-        this.masterPort = commandMaster.port;
-        this.numWorkers = commandMaster.numWorkers;
-        this.pythoncommand = commandMaster.pythoncommand;
+        this.host = guiMaster.getHost();
+        this.port = guiMaster.getPort();
+        this.masterHost = guiMaster.getHost();
+        this.masterPort = guiMaster.getPort();
+        this.numWorkers = guiMaster.getNumWorkers();
+        this.pythoncommand = guiMaster.getPythoncommand();
     }
+
 
     public void update(CommandWorker commandWorker) {
         this.role = WORKER_ROLE;
@@ -59,6 +61,7 @@ public class SystemConfiguration {
         this.numWorkers = commandWorker.numWorkers;
         this.pythoncommand = commandWorker.pythoncommand;
     }
+
 
     public Config toAkkaConfig() {
         return ConfigFactory.parseString("akka.remote.artery.canonical.hostname = \"" + this.host + "\"\n" +

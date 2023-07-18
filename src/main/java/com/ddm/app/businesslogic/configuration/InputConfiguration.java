@@ -1,6 +1,6 @@
 package com.ddm.app.businesslogic.configuration;
 
-
+import com.ddm.app.businesslogic.utils.ConfigMaster;
 import lombok.Data;
 
 import java.io.File;
@@ -15,10 +15,10 @@ public class InputConfiguration {
     private boolean cartoon = false;
     private List<String> colors = new ArrayList<>();
 
-    public void update(CommandMaster commandMaster) {
-        this.inputPath = commandMaster.inputPath;
-        this.cartoon = commandMaster.cartoon;
-        this.colors = commandMaster.colors;
+    public void update(ConfigMaster configMaster) {
+        this.inputPath = configMaster.getInputPath();
+        this.cartoon = configMaster.isCartoon();
+        this.colors = configMaster.getColors();
     }
 
     public File[] getInputFiles() {

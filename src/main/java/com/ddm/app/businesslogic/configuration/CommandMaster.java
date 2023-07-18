@@ -3,19 +3,22 @@ package com.ddm.app.businesslogic.configuration;
 import com.beust.jcommander.Parameter;
 import com.beust.jcommander.Parameters;
 import com.ddm.app.businesslogic.singletons.InputConfigurationSingleton;
+import com.ddm.app.businesslogic.utils.ConfigMaster;
+import lombok.Getter;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 
 @Parameters(commandDescription = "Start a master ActorSystem.")
-public class CommandMaster extends Command {
+@Getter
+public class CommandMaster extends Command implements ConfigMaster {
 
     @Override
     int getDefaultPort() {
         return SystemConfiguration.DEFAULT_MASTER_PORT;
     }
+
     @Parameter(names = {"-ip", "--inputPath"}, description = "Input path for the input data; all files in this folder are considered", arity = 1)
     String inputPath = InputConfigurationSingleton.get().getInputPath();
 
@@ -26,4 +29,23 @@ public class CommandMaster extends Command {
     List<String> colors = new ArrayList<>();
 
 
+    @Override
+    public String getHost() {
+        return super.host;
+    }
+
+    @Override
+    public int getPort() {
+        return super.port;
+    }
+
+    @Override
+    public int getNumWorkers() {
+        return super.numWorkers;
+    }
+
+    @Override
+    public String getPythoncommand() {
+        return super.pythoncommand;
+    }
 }

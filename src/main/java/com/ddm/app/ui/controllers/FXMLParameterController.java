@@ -1,6 +1,8 @@
 package com.ddm.app.ui.controllers;
 
-import com.ddm.app.App;
+import com.ddm.app.businesslogic.singletons.InputConfigurationSingleton;
+import com.ddm.app.businesslogic.singletons.SystemConfigurationSingleton;
+import com.ddm.app.businesslogic.utils.GUIMaster;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.fxml.FXML;
@@ -22,6 +24,7 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.ResourceBundle;
+import java.util.stream.Collectors;
 
 public class FXMLParameterController implements Initializable {
 
@@ -102,42 +105,33 @@ public class FXMLParameterController implements Initializable {
 
     @FXML
     private void confirmPath(){
-        List<String> argsList = new ArrayList<>();
-        argsList.add("master");
-        argsList.add("-w");
-        argsList.add("4");
+        GUIMaster guiMaster = new GUIMaster();
+        guiMaster.setNumWorkers(4);
 
         if (!this.ip.getText().isEmpty()) {
-            argsList.add("-h");
-            argsList.add(this.ip.getText());
+            guiMaster.setHost(this.ip.getText());
         }
 
         if (!this.port.getText().isEmpty()) {
-            argsList.add("-p");
-            argsList.add(this.port.getText());
+            guiMaster.setPort(Integer.parseInt(this.port.getText()));
         }
 
         if (!this.directoryPath.getText().isEmpty()) {
-            argsList.add("-ip");
-            argsList.add(this.directoryPath.getText());
+            guiMaster.setInputPath(this.directoryPath.getText());
         }
 
         if (this.rdButton1.isSelected()){
-            argsList.add("-c");
+            guiMaster.setCartoon(true);
         }
 
         if (this.rdButton2.isSelected()) {
-            argsList.add("-o");
-            for (String color : getSelectedColors()){
-                argsList.add(color.toUpperCase());
-            }
+            guiMaster.setColors(this.getSelectedColors().stream()
+                    .map(String::toUpperCase)
+                    .collect(Collectors.toList()));
         }
 
-        String[] args = argsList.toArray(new String[0]);
-//        for(String arg : args){
-//            System.out.println(arg);
-//        }
-        App.main(args);
+        SystemConfigurationSingleton.get().update(guiMaster);
+        InputConfigurationSingleton.get().update(guiMaster);
 
 
         try {
