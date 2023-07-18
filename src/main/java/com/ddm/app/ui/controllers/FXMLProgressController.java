@@ -1,6 +1,5 @@
 package com.ddm.app.ui.controllers;
 
-import com.ddm.app.ui.interfaces.ProgressInterface;
 import com.ddm.app.ui.utils.TaskItem;
 import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
@@ -12,7 +11,7 @@ import java.net.URL;
 import java.util.List;
 import java.util.ResourceBundle;
 
-public class FXMLProgressController implements Initializable, ProgressInterface {
+public class FXMLProgressController implements Initializable {
 
     private List<TaskItem> taskItems;
 
@@ -24,21 +23,21 @@ public class FXMLProgressController implements Initializable, ProgressInterface 
 
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
+        System.out.println(this.mainProgressBar);
     }
 
-    @Override
-    public void init(int size) {
+
+    public void setNbrImages(List<Integer> nbrImages) {
         taskItems = FXCollections.observableArrayList();
 
         this.taskItems.clear(); // Effacer les tâches existantes
 
-        for (int i = 0; i < size; i++) {
-            TaskItem taskItem = new TaskItem("Tâche " + (i + 1), 0.0);
+        for (int i = 0; i < nbrImages.size(); i++) {
+            TaskItem taskItem = new TaskItem("Video " + (i + 1), 0.0);
             taskItems.add(taskItem);
         }
     }
 
-    @Override
     public void updateProgress(int videoId, double progress) {
 
         this.taskItems.get(videoId).setProgress(progress);

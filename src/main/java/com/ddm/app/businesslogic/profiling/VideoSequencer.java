@@ -12,12 +12,13 @@ import akka.actor.typed.receptionist.ServiceKey;
 import com.ddm.app.businesslogic.Result;
 import com.ddm.app.businesslogic.Task;
 import com.ddm.app.businesslogic.actors.patterns.LargeMessageProxy;
+import com.ddm.app.businesslogic.serialization.AkkaSerializable;
 import com.ddm.app.businesslogic.singletons.InputConfigurationSingleton;
 import com.ddm.app.businesslogic.singletons.SystemConfigurationSingleton;
-import com.ddm.app.businesslogic.serialization.AkkaSerializable;
-import com.ddm.app.businesslogic.utils.*;
-import com.ddm.app.ui.controllers.FXMLProgressController;
-import com.ddm.app.ui.interfaces.ProgressInterface;
+import com.ddm.app.businesslogic.utils.ContentDeleter;
+import com.ddm.app.businesslogic.utils.PythonScriptRunner;
+import com.ddm.app.businesslogic.utils.PythonScripts;
+import com.ddm.app.businesslogic.utils.VideoFPSReader;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -52,6 +53,14 @@ public class VideoSequencer extends AbstractBehavior<VideoSequencer.Message> {
         byte[] image;
         String name;
         String subtitles;
+    }
+
+    @Getter
+    @AllArgsConstructor
+    public static class NbrImagesMessage implements Message {
+        private static final long serialVersionUID = 8652412684126987412L;
+        int id;
+        int nbImages;
     }
 
     @Getter
@@ -98,17 +107,15 @@ public class VideoSequencer extends AbstractBehavior<VideoSequencer.Message> {
         this.cartoon = InputConfigurationSingleton.get().isCartoon();
         this.colors = InputConfigurationSingleton.get().getColors();
 
-        int size = inputFiles.length;
+        this.size = inputFiles.length;
 
-        this.nbrImages = new ArrayList<>(size);
-        this.modifiedImages = new ArrayList<>(size);
-        this.inputReaders = new ArrayList<>(size);
-        this.audioPaths = new ArrayList<>(size);
-        this.progress.init(size);
+        this.nbrImages = new ArrayList<>(this.size);
+        this.modifiedImages = new ArrayList<>(this.size);
+        this.inputReaders = new ArrayList<>(this.size);
+        this.audioPaths = new ArrayList<>(this.size);
 
-        for (int id = 0; id < inputFiles.length; id++){
+        for (int id = 0; id < this.size; id++){
             this.inputReaders.add(context.spawn(InputReader.create(id, inputFiles[id]), InputReader.DEFAULT_NAME + "_" + id));
-            this.nbrImages.add(0);
             this.modifiedImages.add(0);
         }
         this.resultCollector = context.spawn(ResultCollector.create(), ResultCollector.DEFAULT_NAME);
@@ -124,6 +131,8 @@ public class VideoSequencer extends AbstractBehavior<VideoSequencer.Message> {
     /////////////////
 
     private long startTime;
+
+    private final int size;
 
     // Actors attributes
     private final List<ActorRef<InputReader.Message>> inputReaders;
@@ -144,7 +153,7 @@ public class VideoSequencer extends AbstractBehavior<VideoSequencer.Message> {
     private final ArrayList<Integer> modifiedImages;
 
     // ui
-    private final ProgressInterface progress = new FXMLProgressController();
+    //private final ProgressInterface progress = new JFXProgress();
 
     ////////////////////
     // Actor Behavior //
@@ -156,6 +165,7 @@ public class VideoSequencer extends AbstractBehavior<VideoSequencer.Message> {
                 .onMessage(StartMessage.class, this::handle)
                 .onMessage(ImageMessage.class, this::handle)
                 .onMessage(AudioMessage.class, this::handle)
+                .onMessage(NbrImagesMessage.class, this::handle)
                 .onMessage(RegistrationMessage.class, this::handle)
                 .onMessage(CompletionMessage.class, this::handle)
                 .onSignal(Terminated.class, this::handle)
@@ -176,8 +186,6 @@ public class VideoSequencer extends AbstractBehavior<VideoSequencer.Message> {
 
     private Behavior<Message> handle(ImageMessage message) {
 
-        this.nbrImages.set(message.getId(), this.nbrImages.get(message.getId()) + 1)  ;
-
         //Create new Task for the workers
         Task task = new Task(message.getImage(), message.getName(), message.getSubtitles(), this.cartoon, message.getId(), message.getVideoName(), this.colors);
 
@@ -195,6 +203,17 @@ public class VideoSequencer extends AbstractBehavior<VideoSequencer.Message> {
 
     private Behavior<Message> handle(AudioMessage message){
         this.audioPaths.add(message.getId(), message.getAudioPath());
+        return this;
+    }
+
+    private Behavior<Message> handle(NbrImagesMessage message){
+        this.nbrImages.add(message.getId(), message.getNbImages());
+        this.getContext().getLog().info("Hey !!! Got images of {}", message.getId());
+        if (this.nbrImages.size() == this.size){
+
+            //this.progress.initProgress(this.nbrImages);
+
+        }
         return this;
     }
 
@@ -241,7 +260,7 @@ public class VideoSequencer extends AbstractBehavior<VideoSequencer.Message> {
         }
 
         this.modifiedImages.set(videoId, this.modifiedImages.get(videoId) + 1);
-        this.progress.updateProgress(videoId,this.modifiedImages.get(videoId));
+        //this.progress.updateProgress(videoId, (double) this.modifiedImages.get(videoId) );
 
         if (Objects.equals(this.modifiedImages.get(videoId), this.nbrImages.get(videoId))) {
 

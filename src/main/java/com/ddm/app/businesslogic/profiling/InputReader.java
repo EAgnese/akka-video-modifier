@@ -1,5 +1,6 @@
 package com.ddm.app.businesslogic.profiling;
 
+import akka.actor.ActorSelection;
 import akka.actor.typed.ActorRef;
 import akka.actor.typed.Behavior;
 import akka.actor.typed.PostStop;
@@ -7,6 +8,7 @@ import akka.actor.typed.javadsl.AbstractBehavior;
 import akka.actor.typed.javadsl.ActorContext;
 import akka.actor.typed.javadsl.Behaviors;
 import akka.actor.typed.javadsl.Receive;
+import com.ddm.app.businesslogic.actors.Master;
 import com.ddm.app.businesslogic.singletons.SystemConfigurationSingleton;
 import com.ddm.app.businesslogic.serialization.AkkaSerializable;
 import com.ddm.app.businesslogic.utils.PythonScriptRunner;
@@ -78,6 +80,13 @@ public class InputReader extends AbstractBehavior<InputReader.Message> {
         //Cut the video frame by frame
         String[] cmdImages = {pythoncommand, PythonScripts.IMAGES_EXTRACTION.label, "-p", inputFile.getPath(), "-x", "data/images"};
 
+        File imagesDir = new File("data/images/"+ videoName +"/");
+
+        int length = Objects.requireNonNull(imagesDir.listFiles()).length;
+        context.getLog().info(String.valueOf(length));
+
+        ActorSelection videoSequencer = context.getSystem().classicSystem().actorSelection("/user/"+ Master.DEFAULT_NAME + "/" +VideoSequencer.DEFAULT_NAME);
+        videoSequencer.tell(new VideoSequencer.NbrImagesMessage(this.id,length), null);
 
         for (String line : PythonScriptRunner.run(cmdImages)) {
             this.getContext().getLog().info(line);
@@ -121,7 +130,6 @@ public class InputReader extends AbstractBehavior<InputReader.Message> {
     }
 
     private Behavior<Message> handle(ReadVideoMessage message) throws IOException {
-
         this.getContext().getLog().info("Reading video " + this.id);
 
         message.getReplyTo().tell(new VideoSequencer.AudioMessage(this.audioPath, this.id));
