@@ -19,6 +19,8 @@ import com.ddm.app.businesslogic.utils.ContentDeleter;
 import com.ddm.app.businesslogic.utils.PythonScriptRunner;
 import com.ddm.app.businesslogic.utils.PythonScripts;
 import com.ddm.app.businesslogic.utils.VideoFPSReader;
+import com.ddm.app.ui.interfaces.ProgressInterface;
+import com.ddm.app.ui.singletons.JFXProgressSingleton;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -59,8 +61,8 @@ public class VideoSequencer extends AbstractBehavior<VideoSequencer.Message> {
     @AllArgsConstructor
     public static class NbrImagesMessage implements Message {
         private static final long serialVersionUID = 8652412684126987412L;
-        int id;
         int nbImages;
+        int id;
     }
 
     @Getter
@@ -107,17 +109,20 @@ public class VideoSequencer extends AbstractBehavior<VideoSequencer.Message> {
         this.cartoon = InputConfigurationSingleton.get().isCartoon();
         this.colors = InputConfigurationSingleton.get().getColors();
 
-        this.size = inputFiles.length;
+        int size = inputFiles.length;
 
-        this.nbrImages = new ArrayList<>(this.size);
-        this.modifiedImages = new ArrayList<>(this.size);
-        this.inputReaders = new ArrayList<>(this.size);
-        this.audioPaths = new ArrayList<>(this.size);
+        this.nbrImages = new ArrayList<>(size);
+        this.modifiedImages = new ArrayList<>(size);
+        this.inputReaders = new ArrayList<>(size);
+        this.audioPaths = new ArrayList<>(size);
 
-        for (int id = 0; id < this.size; id++){
+        for (int id = 0; id < size; id++){
             this.inputReaders.add(context.spawn(InputReader.create(id, inputFiles[id]), InputReader.DEFAULT_NAME + "_" + id));
             this.modifiedImages.add(0);
+            this.nbrImages.add(null);
+            this.audioPaths.add(null);
         }
+
         this.resultCollector = context.spawn(ResultCollector.create(), ResultCollector.DEFAULT_NAME);
         this.largeMessageProxy = this.getContext().spawn(LargeMessageProxy.create(this.getContext().getSelf().unsafeUpcast()), LargeMessageProxy.DEFAULT_NAME);
 
@@ -131,8 +136,6 @@ public class VideoSequencer extends AbstractBehavior<VideoSequencer.Message> {
     /////////////////
 
     private long startTime;
-
-    private final int size;
 
     // Actors attributes
     private final List<ActorRef<InputReader.Message>> inputReaders;
@@ -153,7 +156,7 @@ public class VideoSequencer extends AbstractBehavior<VideoSequencer.Message> {
     private final ArrayList<Integer> modifiedImages;
 
     // ui
-    //private final ProgressInterface progress = new JFXProgress();
+    private final ProgressInterface progress = JFXProgressSingleton.get();
 
     ////////////////////
     // Actor Behavior //
@@ -202,17 +205,17 @@ public class VideoSequencer extends AbstractBehavior<VideoSequencer.Message> {
     }
 
     private Behavior<Message> handle(AudioMessage message){
-        this.audioPaths.add(message.getId(), message.getAudioPath());
+        this.getContext().getLog().info(this.getContext().getSelf().path().toString());
+        this.audioPaths.set(message.getId(), message.getAudioPath());
         return this;
     }
 
     private Behavior<Message> handle(NbrImagesMessage message){
-        this.nbrImages.add(message.getId(), message.getNbImages());
-        this.getContext().getLog().info("Hey !!! Got images of {}", message.getId());
-        if (this.nbrImages.size() == this.size){
+        this.nbrImages.set(message.getId(), message.getNbImages());
 
-            //this.progress.initProgress(this.nbrImages);
-
+        this.getContext().getLog().info("receiving nbr images");
+        if (!this.nbrImages.contains(null)){
+            this.progress.setNbrImages(this.nbrImages);
         }
         return this;
     }
@@ -260,7 +263,7 @@ public class VideoSequencer extends AbstractBehavior<VideoSequencer.Message> {
         }
 
         this.modifiedImages.set(videoId, this.modifiedImages.get(videoId) + 1);
-        //this.progress.updateProgress(videoId, (double) this.modifiedImages.get(videoId) );
+        this.progress.updateProgress(videoId, (double) this.modifiedImages.get(videoId) );
 
         if (Objects.equals(this.modifiedImages.get(videoId), this.nbrImages.get(videoId))) {
 

@@ -6,7 +6,7 @@
 <?import javafx.scene.text.Text?>
 
 <AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="491.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/20.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.ddm.app.ui.controllers.FXMLProgressController">
-   <ListView layoutX="27.0" layoutY="141.0" prefHeight="312.0" prefWidth="547.0" />
+   <ListView fx:id="taskList" layoutX="27.0" layoutY="141.0" prefHeight="312.0" prefWidth="547.0" />
    <ProgressBar fx:id="mainProgressBar" layoutX="27.0" layoutY="72.0" prefHeight="20.0" prefWidth="488.0" progress="0.0" />
    <Text fx:id="mainPercentage" layoutX="533.0" layoutY="87.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Text" />
 </AnchorPane>

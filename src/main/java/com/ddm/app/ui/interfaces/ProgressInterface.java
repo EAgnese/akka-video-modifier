@@ -5,7 +5,7 @@ import java.util.List;
 public interface ProgressInterface {
 
 
-    void initProgress(List<Integer> nbrImages);
+    void setNbrImages(List<Integer> nbrImages);
 
     void updateProgress(int videoID, double progress);
 

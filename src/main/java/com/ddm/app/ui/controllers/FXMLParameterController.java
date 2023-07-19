@@ -1,5 +1,8 @@
 package com.ddm.app.ui.controllers;
 
+import akka.actor.typed.ActorSystem;
+import com.ddm.app.businesslogic.actors.Guardian;
+import com.ddm.app.businesslogic.configuration.SystemConfiguration;
 import com.ddm.app.businesslogic.singletons.InputConfigurationSingleton;
 import com.ddm.app.businesslogic.singletons.SystemConfigurationSingleton;
 import com.ddm.app.businesslogic.utils.GUIMaster;
@@ -113,6 +116,10 @@ public class FXMLParameterController implements Initializable {
 
         SystemConfigurationSingleton.get().update(guiMaster);
         InputConfigurationSingleton.get().update(guiMaster);
+        SystemConfiguration config = SystemConfigurationSingleton.get();
+
+        final ActorSystem<Guardian.Message> guardian = ActorSystem.create(Guardian.create(), config.getActorSystemName(), config.toAkkaConfig());
+        guardian.tell(new Guardian.StartMessage());
 
 
         try {
@@ -121,11 +128,16 @@ public class FXMLParameterController implements Initializable {
                             "/frames/modifications-progress.fxml"
                     )
             );
-
             Stage newStage = new Stage();
+            newStage.setScene(new Scene(loader.load()));
+
+            JFXProgress progress = JFXProgressSingleton.get();
+            System.out.println(loader.getController().toString());
+            progress.setProgressController(loader.getController());
+            JFXProgressSingleton.set(progress);
+
             newStage.setTitle("progress");
 
-            newStage.setScene(new Scene(loader.load()));
             newStage.show();
 
             Stage stage = (Stage) anchorId.getScene().getWindow();
