@@ -1,4 +1,4 @@
-package com.ddm.app.ui.utils;
+package com.ddm.app.ui.elements;
 
 public class TaskItem {
     private final String name;

@@ -3,18 +3,21 @@ package com.ddm.app.ui.controllers;
 import com.ddm.app.businesslogic.singletons.InputConfigurationSingleton;
 import com.ddm.app.businesslogic.singletons.SystemConfigurationSingleton;
 import com.ddm.app.businesslogic.utils.GUIMaster;
+import com.ddm.app.ui.elements.ColorItem;
+import com.ddm.app.ui.elements.ColorItemCell;
+import com.ddm.app.ui.interfaces.JFXProgress;
+import com.ddm.app.ui.singletons.JFXProgressSingleton;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
-import javafx.geometry.Pos;
 import javafx.scene.Scene;
-import javafx.scene.control.*;
+import javafx.scene.control.Label;
+import javafx.scene.control.ListView;
+import javafx.scene.control.RadioButton;
+import javafx.scene.control.TextField;
 import javafx.scene.layout.AnchorPane;
-import javafx.scene.layout.HBox;
-import javafx.scene.layout.Priority;
-import javafx.scene.layout.Region;
 import javafx.stage.DirectoryChooser;
 import javafx.stage.Stage;
 
@@ -27,28 +30,6 @@ import java.util.ResourceBundle;
 import java.util.stream.Collectors;
 
 public class FXMLParameterController implements Initializable {
-
-    public static class ColorItem {
-
-
-        private final String name;
-        private final BooleanProperty selected;
-        public ColorItem(String name) {
-            this.name = name;
-            this.selected = new SimpleBooleanProperty(false);
-        }
-        public String getName() {
-            return this.name;
-        }
-
-        public boolean isSelected() {
-            return this.selected.get();
-        }
-        public BooleanProperty getSelectedProperty(){
-            return this.selected;
-        }
-
-    }
 
     private final BooleanProperty oneColorSelected = new SimpleBooleanProperty(false);
 
@@ -88,7 +69,7 @@ public class FXMLParameterController implements Initializable {
         this.rdButton3.selectedProperty().set(true);
 
         this.colorList.getItems().addAll(colorItems);
-        colorList.setCellFactory(listView -> new ColorItemCell());
+        this.colorList.setCellFactory(listView -> new ColorItemCell());
     }
 
     @FXML
@@ -201,44 +182,4 @@ public class FXMLParameterController implements Initializable {
 
         return selectedColors;
     }
-
-    private static class ColorItemCell extends ListCell<ColorItem> {
-
-        private final HBox content;
-        private final Label nameLabel;
-        private final CheckBox checkBox;
-
-        public ColorItemCell() {
-            this.content = new HBox();
-            this.nameLabel = new Label();
-            this.checkBox = new CheckBox();
-
-
-
-            Region spacer = new Region();
-            HBox.setHgrow(spacer, Priority.SOMETIMES);
-
-            HBox.setHgrow(this.content, Priority.ALWAYS);
-            content.setAlignment(Pos.CENTER_RIGHT);
-
-            this.content.getChildren().addAll(this.nameLabel, spacer, this.checkBox);
-            this.content.setSpacing(10);
-        }
-
-        @Override
-        protected void updateItem(ColorItem item, boolean empty) {
-            super.updateItem(item, empty);
-
-            if (item == null || empty) {
-                setGraphic(null);
-            } else {
-                this.nameLabel.setText(item.getName());
-
-                item.getSelectedProperty().bind(this.checkBox.selectedProperty());
-
-                setGraphic(this.content);
-            }
-        }
-    }
-
 }

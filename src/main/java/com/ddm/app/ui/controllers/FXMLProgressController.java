@@ -1,6 +1,7 @@
 package com.ddm.app.ui.controllers;
 
-import com.ddm.app.ui.utils.TaskItem;
+import com.ddm.app.ui.elements.TaskItem;
+import com.ddm.app.ui.elements.TaskItemCell;
 import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
@@ -34,13 +35,15 @@ public class FXMLProgressController implements Initializable {
 
         for (int i = 0; i < nbrImages.size(); i++) {
             TaskItem taskItem = new TaskItem("Video " + (i + 1), 0.0);
-            taskItems.add(taskItem);
+            this.taskItems.add(taskItem);
         }
     }
 
     public void updateProgress(int videoId, double progress) {
 
-        this.taskItems.get(videoId).setProgress(progress);
+        TaskItem modifiedTask = this.taskItems.get(videoId);
+        int images = this.nbrImages.get(videoId);
+        modifiedTask.setProgress(progress/images);
 
         double totalProgress = 0.0;
 
@@ -50,7 +53,7 @@ public class FXMLProgressController implements Initializable {
 
         double overallProgress = totalProgress / this.taskItems.size();
         this.mainProgressBar.setProgress(overallProgress);
-        this.mainPercentage.setText(String.format("Avancement total : %.2f%%", overallProgress * 100));
+        this.mainPercentage.setText(String.format("%.2f%%", overallProgress * 100));
     }
 
 }
