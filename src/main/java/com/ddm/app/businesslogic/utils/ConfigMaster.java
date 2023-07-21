@@ -1,16 +1,13 @@
 package com.ddm.app.businesslogic.utils;
 
-import com.ddm.app.businesslogic.singletons.InputConfigurationSingleton;
+import com.ddm.app.ui.interfaces.ProgressInterface;
 
-import java.util.ArrayList;
 import java.util.List;
 
 
 public interface ConfigMaster {
 
-    String inputPath = InputConfigurationSingleton.get().getInputPath();
     boolean cartoon = false;
-    List<String> colors = new ArrayList<>();
 
     String getHost();
     int getPort();
@@ -19,5 +16,7 @@ public interface ConfigMaster {
     String getInputPath();
     boolean isCartoon();
     List<String> getColors();
+
+    ProgressInterface getProgress();
 
 }

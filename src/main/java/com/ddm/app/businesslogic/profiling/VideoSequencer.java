@@ -20,7 +20,6 @@ import com.ddm.app.businesslogic.utils.PythonScriptRunner;
 import com.ddm.app.businesslogic.utils.PythonScripts;
 import com.ddm.app.businesslogic.utils.VideoFPSReader;
 import com.ddm.app.ui.interfaces.ProgressInterface;
-import com.ddm.app.ui.singletons.JFXProgressSingleton;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -156,7 +155,7 @@ public class VideoSequencer extends AbstractBehavior<VideoSequencer.Message> {
     private final ArrayList<Integer> modifiedImages;
 
     // ui
-    private final ProgressInterface progress = JFXProgressSingleton.get();
+    private final ProgressInterface progress = SystemConfigurationSingleton.get().getProgress();
 
     ////////////////////
     // Actor Behavior //

@@ -3,7 +3,9 @@ package com.ddm.app.businesslogic.configuration;
 import com.beust.jcommander.Parameter;
 import com.beust.jcommander.Parameters;
 import com.ddm.app.businesslogic.singletons.InputConfigurationSingleton;
+import com.ddm.app.businesslogic.singletons.JCommanderProgressSingleton;
 import com.ddm.app.businesslogic.utils.ConfigMaster;
+import com.ddm.app.ui.interfaces.ProgressInterface;
 import lombok.Getter;
 
 import java.util.ArrayList;
@@ -22,7 +24,7 @@ public class CommandMaster extends Command implements ConfigMaster {
     @Parameter(names = {"-ip", "--inputPath"}, description = "Input path for the input data; all files in this folder are considered", arity = 1)
     String inputPath = InputConfigurationSingleton.get().getInputPath();
 
-    @Parameter(names = {"-c", "--cartoon"}, description = "Enable the videos\' modification into a cartoon", arity = 0)
+    @Parameter(names = {"-c", "--cartoon"}, description = "Enable the videos' modification into a cartoon", arity = 0)
     boolean cartoon;
 
     @Parameter(names = {"-o", "--one-color"}, description = "Enable the one color effect between [RED, GREEN, BLUE]", variableArity=true)
@@ -48,4 +50,11 @@ public class CommandMaster extends Command implements ConfigMaster {
     public String getPythoncommand() {
         return super.pythoncommand;
     }
+
+    @Override
+    public ProgressInterface getProgress() {
+        return JCommanderProgressSingleton.get();
+    }
+
+
 }

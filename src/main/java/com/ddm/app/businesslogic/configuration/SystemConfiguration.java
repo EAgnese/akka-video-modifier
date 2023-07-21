@@ -1,6 +1,7 @@
 package com.ddm.app.businesslogic.configuration;
 
 import com.ddm.app.businesslogic.utils.ConfigMaster;
+import com.ddm.app.ui.interfaces.ProgressInterface;
 import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;
 import lombok.Data;
@@ -33,6 +34,8 @@ public class SystemConfiguration {
 
 
     private String pythoncommand = DEFAULT_PYTHON_COMMAND; // The python command used to launch python script
+
+    private ProgressInterface progress;
     private static String getDefaultHost() {
         try {
             return InetAddress.getLocalHost().getHostAddress();
@@ -49,6 +52,7 @@ public class SystemConfiguration {
         this.masterPort = guiMaster.getPort();
         this.numWorkers = guiMaster.getNumWorkers();
         this.pythoncommand = guiMaster.getPythoncommand();
+        this.progress = guiMaster.getProgress();
     }
 
 

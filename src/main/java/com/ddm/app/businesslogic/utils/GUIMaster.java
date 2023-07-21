@@ -3,6 +3,8 @@ package com.ddm.app.businesslogic.utils;
 import com.ddm.app.businesslogic.configuration.SystemConfiguration;
 import com.ddm.app.businesslogic.singletons.InputConfigurationSingleton;
 import com.ddm.app.businesslogic.singletons.SystemConfigurationSingleton;
+import com.ddm.app.ui.interfaces.ProgressInterface;
+import com.ddm.app.ui.singletons.JFXProgressSingleton;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -19,4 +21,9 @@ public class GUIMaster implements ConfigMaster {
     String inputPath = InputConfigurationSingleton.get().getInputPath();
     boolean cartoon = false;
     List<String> colors = new ArrayList<>();
+
+    @Override
+    public ProgressInterface getProgress(){
+        return JFXProgressSingleton.get();
+    }
 }
