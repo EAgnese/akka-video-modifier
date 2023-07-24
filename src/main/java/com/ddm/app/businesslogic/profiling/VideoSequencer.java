@@ -16,9 +16,6 @@ import com.ddm.app.businesslogic.serialization.AkkaSerializable;
 import com.ddm.app.businesslogic.singletons.InputConfigurationSingleton;
 import com.ddm.app.businesslogic.singletons.SystemConfigurationSingleton;
 import com.ddm.app.businesslogic.utils.ContentDeleter;
-import com.ddm.app.businesslogic.utils.PythonScriptRunner;
-import com.ddm.app.businesslogic.utils.PythonScripts;
-import com.ddm.app.businesslogic.utils.VideoFPSReader;
 import com.ddm.app.ui.interfaces.ProgressInterface;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -88,6 +85,11 @@ public class VideoSequencer extends AbstractBehavior<VideoSequencer.Message> {
         private static final long serialVersionUID = -7642425159675583598L;
         ActorRef<ModificationWorker.Message> ModificationWorker;
         Result result;
+    }
+
+    @NoArgsConstructor
+    public static class EndMessage implements  Message {
+        private static final long serialVersionUID = 6412368541452463251L;
     }
 
     ////////////////////////
@@ -170,6 +172,7 @@ public class VideoSequencer extends AbstractBehavior<VideoSequencer.Message> {
                 .onMessage(NbrImagesMessage.class, this::handle)
                 .onMessage(RegistrationMessage.class, this::handle)
                 .onMessage(CompletionMessage.class, this::handle)
+                .onMessage(EndMessage.class, this::handle)
                 .onSignal(Terminated.class, this::handle)
                 .build();
     }
@@ -266,30 +269,8 @@ public class VideoSequencer extends AbstractBehavior<VideoSequencer.Message> {
 
         if (Objects.equals(this.modifiedImages.get(videoId), this.nbrImages.get(videoId))) {
 
-            this.getContext().getLog().info("Merging the video number {}", videoId);
+            this.resultCollector.tell(new ResultCollector.ResultMessage(result,this.audioPaths.get(videoId),this.getContext().getSelf()));
 
-            String resultFolder = "result/" + result.getVideoName();
-
-            String pythoncommand = SystemConfigurationSingleton.get().getPythoncommand();
-
-            VideoFPSReader reader = VideoFPSReader.getInstance();
-            HashMap<String, Integer> videoFPSMap = reader.getVideoFPS("", "data/fps.json");
-            int videoFps = videoFPSMap.get(videoName);
-
-            String[] cmdExport = {
-                    pythoncommand, PythonScripts.VIDEO_EXPORT.label,
-                    "-f", resultFolder + "/images",
-                    "-a", this.audioPaths.get(videoId),
-                    "-x", "result/",
-                    "-F", Integer.toString(videoFps)
-            };
-
-            for (String line : PythonScriptRunner.run(cmdExport)){
-                this.getContext().getLog().info(line);
-            }
-            if(this.isAllVideoExported()) {
-                this.end();
-            }
         }
 
         if (this.unassignedTasks.isEmpty()){
@@ -303,16 +284,11 @@ public class VideoSequencer extends AbstractBehavior<VideoSequencer.Message> {
         return this;
     }
 
-    private boolean isAllVideoExported() {
-        int i = 0;
-        while (i < this.modifiedImages.size()) {
-            if (!Objects.equals(this.modifiedImages.get(i), this.nbrImages.get(i))) {
-                return false;
-            }
-            i++;
-        }
-        return true;
+    private Behavior<Message> handle(EndMessage message){
+        this.end();
+        return this;
     }
+
 
     private void end() {
         this.resultCollector.tell(new ResultCollector.FinalizeMessage());

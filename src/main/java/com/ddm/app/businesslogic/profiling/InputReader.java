@@ -50,7 +50,7 @@ public class InputReader extends AbstractBehavior<InputReader.Message> {
 
     private String audioPath;
 
-    private int nbrImages;
+    private final int nbrImages;
 
     public static Behavior<Message> create(final int id, final File inputfile) {
         return Behaviors.setup(context -> new InputReader(context, id, inputfile));
